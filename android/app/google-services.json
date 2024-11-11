@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "854895863309",
+    "project_id": "pneu-c9055",
+    "storage_bucket": "pneu-c9055.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:854895863309:android:384eaf120ff996a5c45744",
+        "android_client_info": {
+          "package_name": "com.example.pneu"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA__Z7rxJEyjAnDSkXfProRTpsq6IvHU4s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
