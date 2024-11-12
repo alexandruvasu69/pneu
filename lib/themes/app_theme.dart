@@ -5,6 +5,7 @@ import 'app_text_styles.dart';
 
 class AppTheme {
   static ThemeData lightTheme = ThemeData(
+    fontFamily: 'SF Pro Display',
     colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primaryAccent),
     scaffoldBackgroundColor: AppColors.primaryColor,
     appBarTheme: AppBarTheme(

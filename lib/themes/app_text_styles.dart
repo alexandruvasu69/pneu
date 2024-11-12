@@ -21,6 +21,6 @@ class AppTextStyles {
   static TextStyle titleLarge = TextStyle(
     color: AppColors.primaryColor,
     fontSize: 20,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.bold,
   );
 }
