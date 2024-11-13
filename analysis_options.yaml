@@ -30,7 +30,7 @@ linter:
     avoid_empty_else: true
     curly_braces_in_flow_control_structures: true
     sort_constructors_first: true
-    prefer_typing_uninitialized_variables: true
+    prefer_typing_uninitialized_variables: false
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options
