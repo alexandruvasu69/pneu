@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pneu/features/map/presentation/screens/map_screen.dart';
-import 'package:pneu/themes/app_theme.dart';
+import 'package:pneu/core/themes/app_theme.dart';
 
 // TO-DO: add routing
 

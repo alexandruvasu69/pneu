@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../themes/app_text_styles.dart';
+import '../core/themes/app_text_styles.dart';
 
 class StyledTitle extends StatelessWidget {
   const StyledTitle(this.text, {super.key});
