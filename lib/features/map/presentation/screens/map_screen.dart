@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pneu/features/map/presentation/widgets/footer.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class MapScreen extends StatelessWidget {
@@ -20,11 +21,7 @@ class MapScreen extends StatelessWidget {
         body: const Center(
           child: Text('Map widget'),
         ),
-        // TO-DO: Add container for search_bar widget
-        footer: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 36),
-          child: Text('This is a search bar'),
-        ),
+        footer: const Footer(),
       ),
     );
   }
