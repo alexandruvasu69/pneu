@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pneu/core/constants/app/footer_constants.dart';
 import 'package:pneu/shared/widgets/custom_search_bar.dart';
 import 'package:pneu/core/themes/app_colors.dart';
 
@@ -6,7 +7,6 @@ class Footer extends StatelessWidget {
   const Footer({super.key, required this.panelPosition});
 
   final double panelPosition;
-  final double pullBarContainerHeight = 36;
 
   @override
   Widget build(BuildContext context) {
@@ -14,12 +14,13 @@ class Footer extends StatelessWidget {
       children: <Widget>[
         Container(
           width: MediaQuery.of(context).size.width,
-          height: pullBarContainerHeight,
-          color: panelPosition > 1 / pullBarContainerHeight ? AppColors.primaryColor : Colors.transparent,
+          height: BarDimensions.pullIconContainerHeight,
+          color:
+              panelPosition > 1 / BarDimensions.pullIconContainerHeight ? AppColors.primaryColor : Colors.transparent,
         ),
         Container(
           width: MediaQuery.of(context).size.width,
-          height: 80,
+          height: BarDimensions.searchBarContainer,
           padding: const EdgeInsets.only(left: 20, right: 20, bottom: 36),
           decoration: ShapeDecoration(
             shape: const RoundedRectangleBorder(

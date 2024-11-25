@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pneu/core/constants/app/footer_constants.dart';
 import 'package:pneu/features/map/presentation/widgets/footer.dart';
 import 'package:pneu/shared/svg_icon.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
@@ -16,7 +17,7 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SlidingUpPanel(
-        minHeight: 116,
+        minHeight: BarDimensions.closedPanelHeight,
         maxHeight: MediaQuery.of(context).size.height * 0.95,
         snapPoint: 0.5,
         borderRadius: BorderRadius.circular(10),
@@ -25,7 +26,7 @@ class _MapScreenState extends State<MapScreen> {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             SizedBox(
-              height: 36,
+              height: BarDimensions.pullIconContainerHeight,
               width: MediaQuery.of(context).size.width,
               child: const SvgIcon('assets/icons/Pull.svg'),
             ),
