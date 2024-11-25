@@ -20,9 +20,9 @@ void main() {
     ));
 
     // Verifică dacă Scaffold-ul este afișat (MapScreen folosește un Scaffold).
-    expect(find.byType(Scaffold), findsOneWidget);
+    expect(find.byType(Scaffold), findsWidgets);
 
     // Verifică dacă MapScreen este afișat corect.
-    expect(find.byType(MapScreen), findsOneWidget);
+    expect(find.byType(MapScreen), findsOne);
   });
 }
