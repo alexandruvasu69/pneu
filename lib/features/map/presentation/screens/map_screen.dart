@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pneu/core/constants/app/footer_constants.dart';
 import 'package:pneu/features/map/presentation/widgets/footer.dart';
+import 'package:pneu/features/map/presentation/widgets/map_widget.dart';
 import 'package:pneu/shared/svg_icon.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
@@ -39,10 +40,7 @@ class _MapScreenState extends State<MapScreen> {
                 : Container(),
           ],
         ),
-        // TO-DO: Add container for map widget
-        body: const Center(
-          child: Text('Map widget'),
-        ),
+        body: const MapWidget(),
         footer: Footer(panelPosition: _panelPosition),
         onPanelSlide: (double position) {
           setState(() {
