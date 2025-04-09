@@ -27,17 +27,6 @@ jobs:
           flutter-version: 3.24.4
       - run: flutter clean
       - run: flutter pub get
-      - name: Set up Android SDK
-        uses: r0adkll/setup-android-sdk@v1
-        with:
-          api-level: 34
-          target: "android-34"
-          build-tools: "34.0.0"
-      - name: Accept Android SDK licenses
-        run: yes | sdkmanager --licenses
-      # Instalează Platforma Android 34 și Build Tools 34.0.0
-      - name: Install SDK Platform 34
-        run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
       - run: flutter test
       - run: flutter build apk
       - run: flutter build appbundle
