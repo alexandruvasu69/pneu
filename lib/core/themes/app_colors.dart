@@ -12,4 +12,7 @@ class AppColors {
   // Miscellaneous
   static Color parkingFound = const Color.fromRGBO(237, 239, 241, 0.9);
   static Color routeColor = const Color.fromRGBO(237, 239, 241, 0.6);
+
+  // Button Colors
+  static Color centerButtonColor = const Color.fromRGBO(237, 239, 241, 0.6);
 }
