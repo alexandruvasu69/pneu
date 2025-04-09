@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:pneu/features/map/presentation/stores/map_store.dart';
+import 'package:pneu/features/map/services/map_controller_service.dart';
+import 'package:provider/provider.dart';
 
 class MapWidget extends StatefulWidget {
-  const MapWidget(this._initialLocation, {super.key});
-  final LatLng? _initialLocation;
+  const MapWidget({super.key});
 
   @override
   State<MapWidget> createState() => _MapWidgetState();
@@ -11,7 +14,16 @@ class MapWidget extends StatefulWidget {
 
 class _MapWidgetState extends State<MapWidget> {
   GoogleMapController? mapController;
-  LatLng? _selectedLocation;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  Future<void> _getCenterCoordinate(CameraPosition cameraPosition) async {
+    LatLng cameraLatLng = cameraPosition.target;
+    context.read<MapStore>().updateCurrentCameraPostition(cameraLatLng);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,17 +31,17 @@ class _MapWidgetState extends State<MapWidget> {
       body: GoogleMap(
         zoomControlsEnabled: false,
         initialCameraPosition: CameraPosition(
-          target: widget._initialLocation!,
+          target: context.read<MapStore>().currentPosition!,
           zoom: 18,
         ),
         onMapCreated: (GoogleMapController controller) {
-          mapController = controller;
+          MapControllerService.instance.setController(controller);
         },
         onLongPress: (LatLng position) {
-          setState(() {
-            _selectedLocation = position;
-          });
-          mapController?.animateCamera(CameraUpdate.newLatLngZoom(_selectedLocation!, 15));
+          print(position);
+        },
+        onCameraMove: (CameraPosition position) {
+          _getCenterCoordinate(position);
         },
       ),
     );
