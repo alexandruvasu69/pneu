@@ -21,12 +21,27 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+    
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: 3.24.4
       - run: flutter clean
       - run: flutter pub get
+
+      - name: Set ANDROID_SDK_ROOT
+        run: echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> $GITHUB_ENV
+
+      - name: Update PATH for Android SDK tools
+        run: echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
+
+      - name: Accept Android SDK licenses
+        run: yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses
+
+      - name: Install Android SDK Platform 34 and Build Tools 34.0.0
+        run: | 
+          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" "platforms;android-34" "build-tools;34.0.0"
+      
       - run: flutter test
       - run: flutter build apk
       - run: flutter build appbundle
