@@ -12,7 +12,8 @@ on:
 jobs:
   flutter-tests:
     runs-on: ubuntu-latest
-  
+    env:
+      MAPBOX_ACCESS_TOKEN: ${{ secrets.MAPBOX_ACCESS_TOKEN }}
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
@@ -52,7 +53,8 @@ jobs:
 
   flutter-ios:
       runs-on: macos-latest
-      
+      env:
+        MAPBOX_ACCESS_TOKEN: ${{ secrets.MAPBOX_ACCESS_TOKEN }}
       steps:
         - name: Clone repository
           uses: actions/checkout@v4
