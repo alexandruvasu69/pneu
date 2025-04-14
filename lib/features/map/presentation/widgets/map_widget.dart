@@ -1,8 +1,8 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' as mb;
+import 'package:pneu/core/utils/conversions.dart';
+import 'package:pneu/features/map/adapters/mapbox_controller.dart';
 import 'package:pneu/features/map/presentation/stores/map_store.dart';
-import 'package:pneu/features/map/services/map_controller_service.dart';
 import 'package:provider/provider.dart';
 
 class MapWidget extends StatefulWidget {
@@ -13,36 +13,26 @@ class MapWidget extends StatefulWidget {
 }
 
 class _MapWidgetState extends State<MapWidget> {
-  GoogleMapController? mapController;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  Future<void> _getCenterCoordinate(CameraPosition cameraPosition) async {
-    LatLng cameraLatLng = cameraPosition.target;
-    context.read<MapStore>().updateCurrentCameraPostition(cameraLatLng);
-  }
-
   @override
   Widget build(BuildContext context) {
+    void handleCameraChange(mb.CameraChangedEventData cameraChangedEventData) {
+      mb.Position position = cameraChangedEventData.cameraState.center.coordinates;
+
+      context.read<MapStore>().updateCurrentCameraPostition(position.toCustomLatLng());
+    }
+
     return Scaffold(
-      body: GoogleMap(
-        zoomControlsEnabled: false,
-        initialCameraPosition: CameraPosition(
-          target: context.read<MapStore>().currentPosition!,
-          zoom: 18,
+      body: mb.MapWidget(
+        textureView: false,
+        styleUri: 'mapbox://styles/alexandruvasu69/cm9ez0nrk00j401sb2659bjxu',
+        cameraOptions: mb.CameraOptions(
+          center: mb.Point(coordinates: context.read<MapStore>().currentPosition!.toMapboxPosition()),
+          zoom: 16,
         ),
-        onMapCreated: (GoogleMapController controller) {
-          MapControllerService.instance.setController(controller);
+        onMapCreated: (mb.MapboxMap mapController) {
+          MapboxController.getInstance().initController(mapController).updateSettings();
         },
-        onLongPress: (LatLng position) {
-          print(position);
-        },
-        onCameraMove: (CameraPosition position) {
-          _getCenterCoordinate(position);
-        },
+        onCameraChangeListener: handleCameraChange,
       ),
     );
   }
