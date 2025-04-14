@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:pneu/shared/models/custom_lat_lng.dart';
 
 class MapStore extends ChangeNotifier {
-  LatLng? _currentPosition;
-  LatLng? _currentCameraPosition;
+  CustomLatLng? _currentPosition;
+  CustomLatLng? _currentCameraPosition;
 
-  LatLng? get currentPosition {
+  CustomLatLng? get currentPosition {
     return _currentPosition;
   }
 
-  LatLng? get currentCameraPostion {
+  CustomLatLng? get currentCameraPostion {
     return _currentCameraPosition;
   }
 
-  void updateCurrentPosition(LatLng currentPosition) {
+  void updateCurrentPosition(CustomLatLng currentPosition) {
     _currentPosition = currentPosition;
+    print(currentPosition);
     notifyListeners();
   }
 
-  void updateCurrentCameraPostition(LatLng currentCameraPosition) {
+  void updateCurrentCameraPostition(CustomLatLng currentCameraPosition) {
     _currentCameraPosition = currentCameraPosition;
     notifyListeners();
   }
