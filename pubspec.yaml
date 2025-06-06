@@ -47,6 +47,8 @@ dependencies:
 
   mapbox_maps_flutter: ^2.0.0
   flutter_dotenv: ^5.2.1
+  shimmer: ^3.0.0
+  flutter_hooks: ^0.21.2
 
 dev_dependencies:
   flutter_test:

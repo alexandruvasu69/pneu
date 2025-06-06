@@ -173,7 +173,7 @@ class _MapScreenState extends State<MapScreen> {
                     _panelPosition * (MediaQuery.of(context).size.height * 0.95 - BarDimensions.closedPanelHeight),
                 right: 30,
                 child: const ActionButtonsPanel(),
-              )
+              ),
             ]),
     );
   }
