@@ -14,6 +14,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 
 class MapScreen extends StatefulWidget {
+  static const routeName = '/';
   const MapScreen({super.key});
 
   @override
