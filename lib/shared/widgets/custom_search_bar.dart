@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pneu/features/login/presentation/notifiers/user_notifier.dart';
 import 'package:pneu/shared/stores/user_store.dart';
 import 'package:pneu/shared/svg_icon_button.dart';
 import 'package:provider/provider.dart';
@@ -45,7 +46,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
           },
         ),
       ],
-      hintText: context.watch<UserStore>().currentUser?.role ?? 'Caută',
+      hintText: context.watch<UserNotifier>().user?.id ?? 'Caută',
       overlayColor: const WidgetStatePropertyAll<Color?>(Colors.transparent),
     );
   }

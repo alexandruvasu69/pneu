@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pneu/features/login/presentation/notifiers/user_notifier.dart';
 import 'package:pneu/features/login/presentation/signup_screen.dart';
 import 'package:pneu/features/map/presentation/screens/map_screen.dart';
 import 'package:pneu/shared/stores/user_store.dart';
@@ -21,7 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userProv = Provider.of<UserStore>(context);
+    final userProv = Provider.of<UserNotifier>(context);
 
     // Dacă provider spune că e loading global, putem arăta un loader peste tot
     if (userProv.isLoading) {
@@ -125,7 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      await Provider.of<UserStore>(context, listen: false).signIn(
+      await Provider.of<UserNotifier>(context, listen: false).signIn(
         email: _email,
         password: _password,
       );
