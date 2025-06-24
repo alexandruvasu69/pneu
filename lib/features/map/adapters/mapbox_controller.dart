@@ -2,8 +2,10 @@
 
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
+import 'package:pneu/core/constants/app/footer_constants.dart';
 import 'package:pneu/core/utils/conversions.dart';
 import 'package:pneu/features/map/domain/abstract_map_controller.dart';
 import 'package:pneu/shared/models/custom_lat_lng.dart';
@@ -47,13 +49,15 @@ class MapboxController extends AbstractMapController<MapboxMap> {
   }
 
   Future<void> showPopUp(CustomLatLng coords) async {
-    PointAnnotationManager annotationManager = await getController()!.annotations.createPointAnnotationManager();
+    PointAnnotationManager annotationManager =
+        await getController()!.annotations.createPointAnnotationManager();
 
     final ByteData bytes = await rootBundle.load('assets/icons/Attention.svg');
     final Uint8List imageData = bytes.buffer.asUint8List();
 
-    PointAnnotationOptions annotationOptions =
-        PointAnnotationOptions(geometry: Point(coordinates: coords.toMapboxPosition()), image: imageData);
+    PointAnnotationOptions annotationOptions = PointAnnotationOptions(
+        geometry: Point(coordinates: coords.toMapboxPosition()),
+        image: imageData);
 
     await annotationManager.create(annotationOptions);
   }
@@ -87,7 +91,8 @@ class MapboxController extends AbstractMapController<MapboxMap> {
           "geometry": {
             "type": "LineString",
             // ignore: always_specify_types
-            "coordinates": coords.map((c) => [c.longitude, c.latitude]).toList(),
+            "coordinates":
+                coords.map((c) => [c.longitude, c.latitude]).toList(),
           },
           // ignore: always_specify_types
           "properties": {}
@@ -113,6 +118,51 @@ class MapboxController extends AbstractMapController<MapboxMap> {
         lineWidth: 4.0,
         lineOpacity: 0.8,
       ),
+    );
+  }
+
+  @override
+  Future<void> animateCameraToBound(List<CustomLatLng> points) async {
+    final MapboxMap? map = getController();
+    if (map == null) return;
+
+    double minLat = points.first.latitude;
+    double minLng = points.first.longitude;
+    double maxLat = points.last.latitude;
+    double maxLng = points.last.longitude;
+
+    for (final point in points) {
+      if (point.latitude < minLat) minLat = point.latitude;
+      if (point.latitude > maxLat) maxLat = point.latitude;
+      if (point.longitude < minLng) minLng = point.longitude;
+      if (point.longitude > maxLng) maxLng = point.longitude;
+    }
+
+    final southWest = Position(minLng, minLat);
+    final northEast = Position(maxLng, maxLat);
+
+    final bounds = CoordinateBounds(
+      southwest: Point(coordinates: southWest),
+      northeast: Point(coordinates: northEast),
+      infiniteBounds: false,
+    );
+
+    final cameraOptions = await map.cameraForCoordinateBounds(
+        bounds,
+        MbxEdgeInsets(
+          top: 50,
+          left: 50,
+          bottom: 150,
+          right: 50,
+        ),
+        null,
+        null,
+        null,
+        null);
+
+    map.flyTo(
+      cameraOptions,
+      MapAnimationOptions(duration: 1500, startDelay: 0),
     );
   }
 }

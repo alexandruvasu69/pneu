@@ -23,7 +23,8 @@ class MapControllerManager {
     }
   }
 
-  void centerMapOnLocationPopup(CustomLatLng realCoords, CustomScreenPosition screenPosition) async {
+  void centerMapOnLocationPopup(
+      CustomLatLng realCoords, CustomScreenPosition screenPosition) async {
     await MapboxController.getInstance().animateCamera(realCoords, 16);
 
     _mapStore.updateIsLocationPopupActive(false);
@@ -35,10 +36,12 @@ class MapControllerManager {
   void updatePopUpScreenLocation() async {
     CustomLatLng realCoord = _mapStore.locationPopupRealCoordinate!;
 
-    CustomScreenPosition screenCoordinate = (await MapboxController.getInstance()
-            .getController()!
-            .pixelForCoordinate(Point(coordinates: realCoord.toMapboxPosition())))
-        .toCustomScreenPosition();
+    CustomScreenPosition screenCoordinate =
+        (await MapboxController.getInstance()
+                .getController()!
+                .pixelForCoordinate(
+                    Point(coordinates: realCoord.toMapboxPosition())))
+            .toCustomScreenPosition();
 
     _mapStore.updateLocationPopupScreenCoordinate(screenCoordinate);
   }
@@ -53,7 +56,8 @@ class MapControllerManager {
     }
 
     // 2) Build URL and call your route API
-    final Uri url = Uri.parse('http://10.0.2.2:54321//rest/v1/rpc/get_full_route_with_events_manual');
+    final Uri url = Uri.parse(
+        '${dotenv.env['SUPABASE_URL']}/rest/v1/rpc/get_full_route_with_events_manual');
     final http.Response resp = await http.post(
       url,
       // ignore: always_specify_types
@@ -81,7 +85,8 @@ class MapControllerManager {
 
     // 3) Parse JSON into List<CustomLatLng>
     final List<dynamic> data = json.decode(resp.body) as List<dynamic>;
-    final List<CustomLatLng> coords = data.expand<CustomLatLng>((dynamic segment) {
+    final List<CustomLatLng> coords =
+        data.expand<CustomLatLng>((dynamic segment) {
       final Map<String, dynamic> geom = segment['geom'] as Map<String, dynamic>;
       final List<dynamic> pts = geom['coordinates'] as List<dynamic>;
       return pts.map<CustomLatLng>((dynamic pt) {
@@ -96,6 +101,7 @@ class MapControllerManager {
 
     // 3) draw route
     final MapboxController mapCtrl = MapboxController.getInstance();
+    await mapCtrl.animateCameraToBound(coords);
     await mapCtrl.drawRoute(coords);
 
     _mapStore.updateIsLocationPopupActive(false);

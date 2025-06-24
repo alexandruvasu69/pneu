@@ -7,6 +7,7 @@ import 'package:pneu/features/map/presentation/stores/panel_store.dart';
 import 'package:pneu/features/map/presentation/widgets/buttons/action_buttons_panel.dart';
 import 'package:pneu/features/map/presentation/widgets/buttons/center_button.dart';
 import 'package:pneu/features/map/presentation/widgets/footer.dart';
+import 'package:pneu/features/map/presentation/widgets/location/location_card.dart';
 import 'package:pneu/features/map/presentation/widgets/map_widget.dart';
 import 'package:pneu/shared/svg_icon_button.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
@@ -53,6 +54,8 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    MapStore mapStore = context.read<MapStore>();
+
     return Scaffold(
       body: context.watch<MapStore>().currentPosition == null
           ? const Center(
@@ -63,7 +66,8 @@ class _MapScreenState extends State<MapScreen> {
                 builder: (BuildContext context, PanelStore panelStore, _) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (_panelController.isAttached && panelStore.openPanel) {
-                      _panelController.animatePanelToPosition(panelStore.panelContentType.snapPoint);
+                      _panelController.animatePanelToPosition(
+                          panelStore.panelContentType.snapPoint);
                     }
                   });
 
@@ -90,14 +94,25 @@ class _MapScreenState extends State<MapScreen> {
 
                         _panelPosition > 1 / 36
                             ? Builder(
-                                builder: (_) {
+                                builder: (context) {
+                                  final mapStore = context.watch<MapStore>();
+
                                   switch (panelStore.panelContentType) {
                                     case PanelContentType.events:
-                                      return const Text('Evenimente în zonă');
+                                      return const Text('Evenimente în zona');
                                     case PanelContentType.locations:
-                                      return const Text('Locațiile tale');
-                                    case PanelContentType.directionDetails:
-                                      return const Text('Detalii directie');
+                                      return const Text('Locatiile tale');
+                                    case PanelContentType.routeDetails:
+                                      print("CURRENT LOCATION: " +
+                                          mapStore.currentLocation!.address1);
+                                      return LocationCard(
+                                        address1: mapStore
+                                                .currentLocation?.address1 ??
+                                            'error',
+                                        address2: mapStore
+                                                .currentLocation?.address2 ??
+                                            'error',
+                                      );
                                     default:
                                       return const SizedBox.shrink();
                                   }
@@ -110,7 +125,8 @@ class _MapScreenState extends State<MapScreen> {
                     footer: Footer(panelPosition: _panelPosition),
                     onPanelClosed: () {
                       if (!panelStore.openPanel) {
-                        panelStore.panelContentType = PanelContentType.locations;
+                        panelStore.panelContentType =
+                            PanelContentType.locations;
                         panelStore.isPanelSnapped = false;
                         panelStore.isClosing = false;
                         panelStore.isOpening = false;
@@ -129,7 +145,8 @@ class _MapScreenState extends State<MapScreen> {
                         panelStore.isPanelSnapped = false;
                       }
 
-                      if (position == panelStore.panelContentType.snapPoint && position == panelStore.position) {
+                      if (position == panelStore.panelContentType.snapPoint &&
+                          position == panelStore.position) {
                         print('PANEL IS SNAPPED');
                         panelStore.isPanelSnapped = true;
                         panelStore.isClosing = false;
@@ -161,7 +178,8 @@ class _MapScreenState extends State<MapScreen> {
                           bottom: BarDimensions.closedPanelHeight +
                               44 +
                               _panelPosition *
-                                  (MediaQuery.of(context).size.height * 0.95 - BarDimensions.closedPanelHeight),
+                                  (MediaQuery.of(context).size.height * 0.95 -
+                                      BarDimensions.closedPanelHeight),
                           left: 30,
                           child: const CenterButton(),
                         )
@@ -171,7 +189,9 @@ class _MapScreenState extends State<MapScreen> {
               Positioned(
                 bottom: BarDimensions.closedPanelHeight +
                     44 +
-                    _panelPosition * (MediaQuery.of(context).size.height * 0.95 - BarDimensions.closedPanelHeight),
+                    _panelPosition *
+                        (MediaQuery.of(context).size.height * 0.95 -
+                            BarDimensions.closedPanelHeight),
                 right: 30,
                 child: const ActionButtonsPanel(),
               ),

@@ -16,4 +16,6 @@ abstract class AbstractMapController<T> {
   Future<void> animateCamera(CustomLatLng position, double zoom);
 
   Future<void> updateSettings();
+
+  Future<void> animateCameraToBound(List<CustomLatLng> boundingBox);
 }

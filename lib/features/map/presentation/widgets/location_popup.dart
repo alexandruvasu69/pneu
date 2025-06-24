@@ -31,14 +31,16 @@ class LocationPopup extends HookWidget {
     final MapStore mapStore = useListenable(context.read<MapStore>());
 
     final bool isActive = mapStore.isLocationPopupActive;
-    final CustomScreenPosition? screenCoord = mapStore.locationPopupScreenCoordinate;
+    final CustomScreenPosition? screenCoord =
+        mapStore.locationPopupScreenCoordinate;
     final CustomLatLng? realCoord = mapStore.locationPopupRealCoordinate;
 
     Future<void> fetchLocationForCoords() async {
       _isLoading.value = true;
 
       try {
-        final CustomLatLng real = context.read<MapStore>().locationPopupRealCoordinate!;
+        final CustomLatLng real =
+            context.read<MapStore>().locationPopupRealCoordinate!;
         final double lon = real.longitude;
         final double lat = real.latitude;
         final Uri url = Uri.parse(
@@ -54,7 +56,8 @@ class LocationPopup extends HookWidget {
           return;
         }
 
-        final Map<String, dynamic> jsonMap = json.decode(response.body) as Map<String, dynamic>;
+        final Map<String, dynamic> jsonMap =
+            json.decode(response.body) as Map<String, dynamic>;
         final GeocodingResponse geoResp = GeocodingResponse.fromJson(jsonMap);
 
         if (geoResp.features.isEmpty) {
@@ -66,7 +69,8 @@ class LocationPopup extends HookWidget {
         final Feature feature = geoResp.features.first;
 
         // 1) Linia principală: folosim 'name' (ex. "Strada Mexic 1")
-        address1.value = feature.name.isNotEmpty ? feature.name : feature.fullAddress;
+        address1.value =
+            feature.name.isNotEmpty ? feature.name : feature.fullAddress;
 
         // 2) Linie secundară: căutăm 'place' → 'region' → 'country'
         final Map<String, Context> ctx = feature.props.context;
@@ -95,8 +99,7 @@ class LocationPopup extends HookWidget {
     useEffect(() {
       // dacă s‑a deschis popup-ul sau coord s‑a schimbat
       if (isActive) {
-        _isLoading.value = true;
-        fetchLocationForCoords();
+        context.read<MapStore>().loadLocation();
       }
 
       return null; // no cleanup
@@ -131,32 +134,40 @@ class LocationPopup extends HookWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        _isLoading.value
+                        context.read<MapStore>().isLocationLoading
                             // Skeleton pentru linia 1
                             ? const SkeletonBox(width: 150, height: 20)
                             : Text(
-                                address1.value,
+                                context
+                                    .read<MapStore>()
+                                    .currentLocation!
+                                    .address1,
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold),
                               ),
-                        _isLoading.value
+                        context.read<MapStore>().isLocationLoading
                             // Skeleton pentru linia 2
                             ? const SkeletonBox(width: 100, height: 16)
                             : Text(
-                                address2.value,
-                                style: const TextStyle(fontSize: 14, color: Colors.grey),
+                                context
+                                    .read<MapStore>()
+                                    .currentLocation!
+                                    .address2,
+                                style: const TextStyle(
+                                    fontSize: 14, color: Colors.grey),
                               ),
                         const SizedBox(height: 12),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: <Widget>[
-                            _isLoading.value
+                            context.read<MapStore>().isLocationLoading
                                 ? const SkeletonBox(width: 100, height: 25)
                                 : ElevatedButton(
                                     onPressed: onCancel,
                                     child: const Text('Cancel'),
                                   ),
-                            _isLoading.value
+                            context.read<MapStore>().isLocationLoading
                                 ? const SkeletonBox(width: 100, height: 25)
                                 : ElevatedButton(
                                     onPressed: onRoutes,

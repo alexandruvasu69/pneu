@@ -1,14 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:pneu/features/map/domain/entities/location.dart';
+import 'package:pneu/features/map/domain/usecases/get_location.dart';
 import 'package:pneu/shared/models/custom_lat_lng.dart';
 import 'package:pneu/shared/models/custom_screen_position.dart';
 
 class MapStore extends ChangeNotifier {
+  MapStore({required this.getLocation});
+
   CustomLatLng? _currentPosition;
   CustomLatLng? _currentCameraPosition;
 
+  GetLocation getLocation;
+  Location? _selectedLocation;
+  bool _isLocationLoading = false;
+  String? _locationError;
   CustomScreenPosition? _locationPopupScreenCoordinate;
   CustomLatLng? _locationPopupRealCoordinate;
   bool _isLocationPopupActive = false;
+
+  Location? get currentLocation => _selectedLocation;
+  bool get isLocationLoading => _isLocationLoading;
+  String? get locationError => _locationError;
+
+  Future<void> loadLocation() async {
+    _isLocationLoading = true;
+    _locationError = null;
+    notifyListeners();
+
+    try {
+      if (_locationPopupRealCoordinate != null) {
+        _selectedLocation = await getLocation(
+            _locationPopupRealCoordinate!.latitude,
+            _locationPopupRealCoordinate!.longitude);
+      }
+    } catch (e) {
+      _locationError = e.toString();
+    }
+
+    _isLocationLoading = false;
+    notifyListeners();
+  }
 
   CustomLatLng? get currentPosition {
     return _currentPosition;
@@ -41,7 +72,8 @@ class MapStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateLocationPopupScreenCoordinate(CustomScreenPosition screenCoordinate) {
+  void updateLocationPopupScreenCoordinate(
+      CustomScreenPosition screenCoordinate) {
     _locationPopupScreenCoordinate = screenCoordinate;
     notifyListeners();
   }

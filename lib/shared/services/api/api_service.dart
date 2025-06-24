@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 abstract class ApiService {
@@ -5,7 +6,7 @@ abstract class ApiService {
       : _route = route,
         _body = body;
 
-  final String url = 'http://10.0.2.2:54321';
+  final String url = '${dotenv.env['SUPABASE_URL']}';
   String _route;
   Map<String, dynamic>? _body;
 

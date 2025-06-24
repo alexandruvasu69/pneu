@@ -11,6 +11,10 @@ import 'package:pneu/features/login/domain/usecases/register.dart';
 import 'package:pneu/features/login/presentation/login_screen.dart';
 import 'package:pneu/features/login/presentation/notifiers/user_notifier.dart';
 import 'package:pneu/features/login/presentation/signup_screen.dart';
+import 'package:pneu/features/map/data/datasources/location_mapbox_geocoding_data_source.dart';
+import 'package:pneu/features/map/data/repositories/location_repository_impl.dart';
+import 'package:pneu/features/map/domain/repositories/location_repository.dart';
+import 'package:pneu/features/map/domain/usecases/get_location.dart';
 import 'package:pneu/features/map/managers/location_manager.dart';
 import 'package:pneu/features/map/managers/map_controller_manager.dart';
 import 'package:pneu/features/map/presentation/screens/map_screen.dart';
@@ -34,12 +38,21 @@ void main() async {
   Login login = Login(repository);
   Register register = Register(repository);
 
-  final userNotifier = UserNotifier(getUser: getUser, login: login, register: register);
+  final userNotifier =
+      UserNotifier(getUser: getUser, login: login, register: register);
   await userNotifier.loadInitialUser();
+
+  LocationMapboxGeocodingDataSource locationSource =
+      LocationMapboxGeocodingDataSource();
+  LocationRepository locationRepository =
+      LocationRepositoryImpl(locationSource);
+  GetLocation getLocation = GetLocation(locationRepository);
+
+  final mapStore = MapStore(getLocation: getLocation);
 
   runApp(MultiProvider(
     providers: <SingleChildWidget>[
-      ChangeNotifierProvider<MapStore>(create: (_) => MapStore()),
+      ChangeNotifierProvider<MapStore>.value(value: mapStore),
       ProxyProvider<MapStore, LocationManager>(
         update: (_, MapStore mapStore, __) => LocationManager(mapStore),
       ),
