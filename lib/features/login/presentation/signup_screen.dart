@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pneu/features/map/presentation/screens/map_screen.dart';
+import 'package:pneu/features/map/presentation/map_screen.dart';
 import 'package:pneu/shared/stores/user_store.dart';
 import 'package:provider/provider.dart';
 

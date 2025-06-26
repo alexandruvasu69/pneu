@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' as mb;
 import 'package:pneu/core/utils/conversions.dart';
-import 'package:pneu/features/map/adapters/mapbox_controller.dart';
+import 'package:pneu/features/map/data/models/mapbox_controller.dart';
 import 'package:pneu/features/map/enums/panel_content_type.dart';
+import 'package:pneu/features/map/presentation/stores/location_popup_store.dart';
 import 'package:pneu/features/map/presentation/stores/map_store.dart';
 import 'package:pneu/features/map/presentation/stores/panel_store.dart';
 import 'package:pneu/features/map/presentation/stores/position_store.dart';
@@ -27,15 +28,9 @@ class _MapWidgetState extends State<MapWidget> {
 
       mapStore.updateCurrentCameraPostition(position.toCustomLatLng());
 
-      if (mapStore.isLocationPopupActive) {
+      if (context.read<LocationPopupStore>().isLocationPopupActive) {
         mapStore.updatePopUpScreenLocation();
       }
-
-      print("ACTIVE: " + mapStore.isLocationPopupActive.toString());
-      print(
-          "SCREEN COORD: ${mapStore.locationPopupScreenCoordinate?.x}, ${mapStore.locationPopupScreenCoordinate?.y}");
-      print(
-          "REAL COORD: ${mapStore.locationPopupRealCoordinate?.latitude}, ${mapStore.locationPopupRealCoordinate?.longitude}");
     }
 
     return Scaffold(
@@ -64,12 +59,12 @@ class _MapWidgetState extends State<MapWidget> {
                 mapContext.touchPosition.toCustomScreenPosition());
           },
           onTapListener: (mb.MapContentGestureContext mapContext) {
-            context.read<MapStore>().updateIsLocationPopupActive(false);
+            context.read<LocationPopupStore>().isLocationPopupActive = false;
           },
         ),
         LocationPopup(
           onCancel: () {
-            context.read<MapStore>().updateIsLocationPopupActive(false);
+            context.read<LocationPopupStore>().isLocationPopupActive = false;
           },
           onRoutes: () async {
             PanelStore panelStore = context.read<PanelStore>();

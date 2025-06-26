@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:pneu/features/map/data/models/geocoding_response.dart';
+import 'package:pneu/features/map/presentation/stores/location_popup_store.dart';
 import 'package:pneu/features/map/presentation/stores/map_store.dart';
 import 'package:pneu/features/map/presentation/widgets/skeleton_box.dart';
 import 'package:pneu/shared/models/custom_lat_lng.dart';
@@ -28,21 +29,23 @@ class LocationPopup extends HookWidget {
     final ValueNotifier<String> address1 = useState<String>('');
     final ValueNotifier<String> address2 = useState<String>('');
 
-    final MapStore mapStore = useListenable(context.read<MapStore>());
+    final LocationPopupStore locationPopupStore =
+        useListenable(context.read<LocationPopupStore>());
 
-    final bool isActive = mapStore.isLocationPopupActive;
+    final bool isActive = locationPopupStore.isLocationPopupActive;
     final CustomScreenPosition? screenCoord =
-        mapStore.locationPopupScreenCoordinate;
-    final CustomLatLng? realCoord = mapStore.locationPopupRealCoordinate;
+        locationPopupStore.locationPopupScreenCoordinate;
+    final CustomLatLng? realCoord =
+        locationPopupStore.locationPopupRealCoordinate;
 
     Future<void> fetchLocationForCoords() async {
       _isLoading.value = true;
 
       try {
-        final CustomLatLng real =
-            context.read<MapStore>().locationPopupRealCoordinate!;
-        final double lon = real.longitude;
-        final double lat = real.latitude;
+        final CustomLatLng? real =
+            context.read<LocationPopupStore>().locationPopupRealCoordinate;
+        final double lon = real!.longitude;
+        final double lat = real!.latitude;
         final Uri url = Uri.parse(
           'https://api.mapbox.com/search/geocode/v6/reverse'
           '?longitude=$lon&latitude=$lat'
@@ -101,7 +104,10 @@ class LocationPopup extends HookWidget {
 
       // dacă s‑a deschis popup-ul sau coord s‑a schimbat
       if (isActive) {
-        context.read<MapStore>().loadLocation();
+        // defer until after the build finishes
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          context.read<LocationPopupStore>().loadLocation();
+        });
       }
 
       return null; // no cleanup
@@ -136,26 +142,27 @@ class LocationPopup extends HookWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        context.read<MapStore>().isLocationLoading
+                        context.read<LocationPopupStore>().isLocationLoading
                             // Skeleton pentru linia 1
                             ? const SkeletonBox(width: 150, height: 20)
                             : Text(
                                 context
-                                    .read<MapStore>()
+                                    .read<LocationPopupStore>()
                                     .currentLocation!
                                     .address1,
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
                                     fontSize: 16, fontWeight: FontWeight.bold),
                               ),
-                        context.read<MapStore>().isLocationLoading
+                        context.read<LocationPopupStore>().isLocationLoading
                             // Skeleton pentru linia 2
                             ? const SkeletonBox(width: 100, height: 16)
                             : Text(
                                 context
-                                    .read<MapStore>()
-                                    .currentLocation!
-                                    .address2,
+                                        .read<LocationPopupStore>()
+                                        .currentLocation!
+                                        .address2 ??
+                                    'fjjfj',
                                 style: const TextStyle(
                                     fontSize: 14, color: Colors.grey),
                               ),
@@ -163,13 +170,13 @@ class LocationPopup extends HookWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: <Widget>[
-                            context.read<MapStore>().isLocationLoading
+                            context.read<LocationPopupStore>().isLocationLoading
                                 ? const SkeletonBox(width: 100, height: 25)
                                 : ElevatedButton(
                                     onPressed: onCancel,
                                     child: const Text('Cancel'),
                                   ),
-                            context.read<MapStore>().isLocationLoading
+                            context.read<LocationPopupStore>().isLocationLoading
                                 ? const SkeletonBox(width: 100, height: 25)
                                 : ElevatedButton(
                                     onPressed: onRoutes,

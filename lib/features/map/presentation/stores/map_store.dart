@@ -1,103 +1,39 @@
 import 'dart:convert';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:pneu/features/map/adapters/mapbox_controller.dart';
-import 'package:pneu/features/map/domain/abstract_map_controller.dart';
-import 'package:pneu/features/map/domain/entities/location.dart';
-import 'package:pneu/features/map/domain/usecases/get_location.dart';
+import 'package:pneu/features/map/data/models/mapbox_controller.dart';
+import 'package:pneu/features/map/domain/entities/abstract_map_controller.dart';
+import 'package:pneu/features/map/presentation/stores/location_popup_store.dart';
 import 'package:pneu/shared/models/custom_lat_lng.dart';
 import 'package:pneu/shared/models/custom_screen_position.dart';
 
 class MapStore extends ChangeNotifier {
-  MapStore({required this.getLocation, AbstractMapController? mapController});
+  MapStore({
+    required LocationPopupStore locationPopupStore,
+  }) : _locationPopupStore = locationPopupStore;
 
-  CustomLatLng? _currentPosition;
+  LocationPopupStore _locationPopupStore;
+
+  AbstractMapController? mapController;
+
+//   CustomLatLng? _currentPosition;
   CustomLatLng? _currentCameraPosition;
+//   CustomLatLng? get currentPosition => _currentPosition;
+  CustomLatLng? get currentCameraPostion => _currentCameraPosition;
 
   List<CustomLatLng>? route;
 
-  GetLocation getLocation;
-  Location? _selectedLocation;
-  bool _isLocationLoading = false;
-  String? _locationError;
-  CustomScreenPosition? _locationPopupScreenCoordinate;
-  CustomLatLng? _locationPopupRealCoordinate;
-  bool _isLocationPopupActive = false;
-
-  Location? get currentLocation => _selectedLocation;
-  bool get isLocationLoading => _isLocationLoading;
-  String? get locationError => _locationError;
-
-  Future<void> loadLocation() async {
-    _isLocationLoading = true;
-    _locationError = null;
-    notifyListeners();
-
-    try {
-      if (_locationPopupRealCoordinate != null) {
-        _selectedLocation = await getLocation(
-            _locationPopupRealCoordinate!.latitude,
-            _locationPopupRealCoordinate!.longitude);
-      }
-    } catch (e) {
-      _locationError = e.toString();
-    }
-
-    _isLocationLoading = false;
-    notifyListeners();
-  }
-
-  CustomLatLng? get currentPosition {
-    return _currentPosition;
-  }
-
-  CustomLatLng? get currentCameraPostion {
-    return _currentCameraPosition;
-  }
-
-  CustomLatLng? get locationPopupRealCoordinate {
-    return _locationPopupRealCoordinate;
-  }
-
-  CustomScreenPosition? get locationPopupScreenCoordinate {
-    return _locationPopupScreenCoordinate;
-  }
-
-  bool get isLocationPopupActive {
-    return _isLocationPopupActive;
-  }
-
-  void updateCurrentPosition(CustomLatLng currentPosition) {
-    _currentPosition = currentPosition;
-    print(currentPosition);
-    notifyListeners();
-  }
+//   void updateCurrentPosition(CustomLatLng currentPosition) {
+//     _currentPosition = currentPosition;
+//     print(currentPosition);
+//     notifyListeners();
+//   }
 
   void updateCurrentCameraPostition(CustomLatLng currentCameraPosition) {
     _currentCameraPosition = currentCameraPosition;
     notifyListeners();
   }
-
-  void updateLocationPopupScreenCoordinate(
-      CustomScreenPosition screenCoordinate) {
-    _locationPopupScreenCoordinate = screenCoordinate;
-    notifyListeners();
-  }
-
-  void updateIsLocationPopupActive(bool isLocationPopupActive) {
-    _isLocationPopupActive = isLocationPopupActive;
-    notifyListeners();
-  }
-
-  void updateLocationPopupRealCoordinate(CustomLatLng realCoord) {
-    _locationPopupRealCoordinate = realCoord;
-    notifyListeners();
-  }
-
-  AbstractMapController? mapController;
 
   void centerMapOnCurrentLocation(CustomLatLng currentPosition) {
     // CustomLatLng? currentPosition = _currentPosition;
@@ -114,22 +50,22 @@ class MapStore extends ChangeNotifier {
       CustomLatLng realCoords, CustomScreenPosition screenPosition) async {
     await mapController?.animateCamera(realCoords, 16);
 
-    _isLocationPopupActive = false;
-    _locationPopupRealCoordinate = realCoords;
-    _locationPopupScreenCoordinate = screenPosition;
-    _isLocationPopupActive = true;
+    _locationPopupStore.isLocationPopupActive = false;
+    _locationPopupStore.locationPopupRealCoordinate = realCoords;
+    _locationPopupStore.locationPopupScreenCoordinate = screenPosition;
+    _locationPopupStore.isLocationPopupActive = true;
 
     notifyListeners();
   }
 
   void updatePopUpScreenLocation() async {
     try {
-      CustomLatLng realCoord = locationPopupRealCoordinate!;
+      CustomLatLng realCoord = _locationPopupStore.locationPopupRealCoordinate!;
 
       CustomScreenPosition screenCoordinate =
           await mapController!.getScreenPositionForCoord(realCoord);
 
-      _locationPopupScreenCoordinate = screenCoordinate;
+      _locationPopupStore.locationPopupScreenCoordinate = screenCoordinate;
 
       notifyListeners();
     } catch (e) {
@@ -139,7 +75,7 @@ class MapStore extends ChangeNotifier {
 
   Future<void> fetchAndDrawRoute(CustomLatLng start) async {
     // 1) Read start/end from the store
-    final CustomLatLng? end = locationPopupRealCoordinate;
+    final CustomLatLng? end = _locationPopupStore.locationPopupRealCoordinate;
 
     if (start == null || end == null) {
       throw Exception('Start or end location not set');
@@ -194,7 +130,7 @@ class MapStore extends ChangeNotifier {
     await mapController?.animateCameraToBound(coords);
     await mapController?.drawRoute(coords);
 
-    updateIsLocationPopupActive(false);
+    _locationPopupStore.isLocationPopupActive = false;
 
     notifyListeners();
   }

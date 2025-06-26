@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:pneu/core/utils/conversions.dart';
 import 'package:pneu/features/map/presentation/stores/map_store.dart';
 import 'package:pneu/shared/models/custom_lat_lng.dart';
 
@@ -16,6 +17,28 @@ class PositionStore extends ChangeNotifier {
   set currentPosition(CustomLatLng? position) {
     _currentPosition = position;
     notifyListeners();
+  }
+
+  Future<void> initializeCurrentLocation() async {
+    if (await Geolocator.isLocationServiceEnabled() == false) {
+      throw Exception('Location Service not enabled!');
+    }
+
+    LocationPermission locationPermission = await Geolocator.checkPermission();
+    if (locationPermission == LocationPermission.denied) {
+      locationPermission = await Geolocator.requestPermission();
+      if (locationPermission == LocationPermission.denied) {
+        throw Exception('Location permission denied');
+      }
+    }
+
+    final Position? currentPosition = await Geolocator.getCurrentPosition();
+    if (currentPosition != null) {
+      _currentPosition = currentPosition.toCustomLatLng();
+      notifyListeners();
+    } else {
+      throw Exception("Couldn't retrieve current location");
+    }
   }
 
   void startPositionStream() {

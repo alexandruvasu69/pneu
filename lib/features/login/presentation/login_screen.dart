@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pneu/features/login/presentation/notifiers/user_notifier.dart';
 import 'package:pneu/features/login/presentation/signup_screen.dart';
-import 'package:pneu/features/map/presentation/screens/map_screen.dart';
+import 'package:pneu/features/map/presentation/map_screen.dart';
 import 'package:pneu/shared/stores/user_store.dart';
 import 'package:provider/provider.dart';
 
@@ -90,7 +90,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 8),
                     TextButton(
                       onPressed: () {
-                        Navigator.of(context).pushReplacementNamed(SignupScreen.routeName);
+                        Navigator.of(context)
+                            .pushReplacementNamed(SignupScreen.routeName);
                       },
                       child: const Text('Nu ai cont? Înregistrează-te'),
                     ),

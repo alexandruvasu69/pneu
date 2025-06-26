@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:pneu/core/constants/app/footer_constants.dart';
 import 'package:pneu/core/utils/conversions.dart';
-import 'package:pneu/features/map/domain/abstract_map_controller.dart';
+import 'package:pneu/features/map/domain/entities/abstract_map_controller.dart';
 import 'package:pneu/shared/models/custom_lat_lng.dart';
 import 'package:pneu/shared/models/custom_screen_position.dart';
 

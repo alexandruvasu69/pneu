@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pneu/core/constants/app/footer_constants.dart';
 import 'package:pneu/features/map/enums/panel_content_type.dart';
-import 'package:pneu/features/map/managers/location_manager.dart';
+import 'package:pneu/features/map/presentation/stores/location_popup_store.dart';
 import 'package:pneu/features/map/presentation/stores/map_store.dart';
 import 'package:pneu/features/map/presentation/stores/panel_store.dart';
 import 'package:pneu/features/map/presentation/stores/position_store.dart';
@@ -33,11 +33,11 @@ class _MapScreenState extends State<MapScreen> {
 
     context.read<PositionStore>().startPositionStream();
 
-    Future<Null>.microtask(() {
-      if (!mounted) return;
-      final LocationManager manager = context.read<LocationManager>();
-      manager.initializeCurrentLocation();
-    });
+    // Future<Null>.microtask(() {
+    //   if (!mounted) return;
+    //   final LocationManager manager = context.read<LocationManager>();
+    //   manager.initializeCurrentLocation();
+    // });
   }
 
   bool _compareCameraPosition(MapStore mapStore, PositionStore positionStore) {
@@ -99,7 +99,8 @@ class _MapScreenState extends State<MapScreen> {
                         _panelPosition > 1 / 36
                             ? Builder(
                                 builder: (context) {
-                                  final mapStore = context.watch<MapStore>();
+                                  final locationPopupStore =
+                                      context.watch<LocationPopupStore>();
 
                                   switch (panelStore.panelContentType) {
                                     case PanelContentType.events:
@@ -108,10 +109,10 @@ class _MapScreenState extends State<MapScreen> {
                                       return const Text('Locatiile tale');
                                     case PanelContentType.routeDetails:
                                       return LocationCard(
-                                        address1: mapStore
+                                        address1: locationPopupStore
                                                 .currentLocation?.address1 ??
                                             'error',
-                                        address2: mapStore
+                                        address2: locationPopupStore
                                                 .currentLocation?.address2 ??
                                             'error',
                                       );

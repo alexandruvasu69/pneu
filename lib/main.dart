@@ -15,9 +15,9 @@ import 'package:pneu/features/map/data/datasources/location_mapbox_geocoding_dat
 import 'package:pneu/features/map/data/repositories/location_repository_impl.dart';
 import 'package:pneu/features/map/domain/repositories/location_repository.dart';
 import 'package:pneu/features/map/domain/usecases/get_location.dart';
-import 'package:pneu/features/map/managers/location_manager.dart';
-import 'package:pneu/features/map/presentation/screens/map_screen.dart';
+import 'package:pneu/features/map/presentation/map_screen.dart';
 import 'package:pneu/core/themes/app_theme.dart';
+import 'package:pneu/features/map/presentation/stores/location_popup_store.dart';
 import 'package:pneu/features/map/presentation/stores/map_store.dart';
 import 'package:pneu/features/map/presentation/stores/panel_store.dart';
 import 'package:pneu/features/map/presentation/stores/position_store.dart';
@@ -45,15 +45,15 @@ void main() async {
       LocationRepositoryImpl(locationSource);
   GetLocation getLocation = GetLocation(locationRepository);
 
-  final mapStore = MapStore(getLocation: getLocation);
+  final locationPopupStore = LocationPopupStore(getLocation: getLocation);
+  final mapStore = MapStore(locationPopupStore: locationPopupStore);
   final positionStore = PositionStore(mapStore: mapStore);
 
   runApp(MultiProvider(
     providers: <SingleChildWidget>[
+      ChangeNotifierProvider<LocationPopupStore>.value(
+          value: locationPopupStore),
       ChangeNotifierProvider<MapStore>.value(value: mapStore),
-      ProxyProvider<MapStore, LocationManager>(
-        update: (_, MapStore mapStore, __) => LocationManager(mapStore),
-      ),
       ChangeNotifierProvider<PanelStore>(create: (_) => PanelStore()),
       ChangeNotifierProvider<UserNotifier>.value(value: userNotifier),
       ChangeNotifierProvider<PositionStore>.value(

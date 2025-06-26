@@ -30,7 +30,9 @@ class _ActionButtonsPanelState extends State<ActionButtonsPanel> {
 
   @override
   Widget build(BuildContext context) {
-    context.watch<PanelStore>().openPanel ? isGeneralActionButtonActive = false : null;
+    context.watch<PanelStore>().openPanel
+        ? isGeneralActionButtonActive = false
+        : null;
 
     return Column(
       children: <Widget>[
