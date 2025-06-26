@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pneu/core/themes/app_colors.dart';
 import 'package:pneu/features/map/presentation/stores/map_store.dart';
-import 'package:pneu/shared/svg_icon_button.dart';
+import 'package:pneu/features/map/presentation/stores/position_store.dart';
 import 'package:provider/provider.dart';
 
 class LocationCard extends StatelessWidget {
@@ -13,6 +13,17 @@ class LocationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    void handleOnCancelPress() {
+      MapStore mapStore = context.read<MapStore>();
+      mapStore.centerMapOnCurrentLocation(
+          context.read<PositionStore>().currentPosition!);
+      mapStore.clearRoute();
+    }
+
+    void handleOnStartPress() {
+      context.read<MapStore>().startRoute();
+    }
+
     return Column(
       children: [
         Container(
@@ -52,11 +63,6 @@ class LocationCard extends StatelessWidget {
                   ],
                 ),
               ),
-              IconButton(
-                onPressed: () {},
-                icon: SvgPicture.asset('assets/icons/Share.svg'),
-                highlightColor: Colors.transparent,
-              ),
             ],
           ),
         ),
@@ -66,11 +72,11 @@ class LocationCard extends StatelessWidget {
           spacing: 46,
           children: <Widget>[
             ElevatedButton(
-              onPressed: () {},
+              onPressed: handleOnCancelPress,
               child: const Text('Cancel'),
             ),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: handleOnStartPress,
               child: const Text('Start'),
             ),
           ],

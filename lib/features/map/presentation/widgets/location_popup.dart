@@ -97,6 +97,8 @@ class LocationPopup extends HookWidget {
     }
 
     useEffect(() {
+      print("IS ACTIVE: " + isActive.toString());
+
       // dacă s‑a deschis popup-ul sau coord s‑a schimbat
       if (isActive) {
         context.read<MapStore>().loadLocation();

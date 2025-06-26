@@ -4,6 +4,7 @@ import 'package:pneu/features/map/enums/panel_content_type.dart';
 import 'package:pneu/features/map/managers/location_manager.dart';
 import 'package:pneu/features/map/presentation/stores/map_store.dart';
 import 'package:pneu/features/map/presentation/stores/panel_store.dart';
+import 'package:pneu/features/map/presentation/stores/position_store.dart';
 import 'package:pneu/features/map/presentation/widgets/buttons/action_buttons_panel.dart';
 import 'package:pneu/features/map/presentation/widgets/buttons/center_button.dart';
 import 'package:pneu/features/map/presentation/widgets/footer.dart';
@@ -30,6 +31,8 @@ class _MapScreenState extends State<MapScreen> {
   void initState() {
     super.initState();
 
+    context.read<PositionStore>().startPositionStream();
+
     Future<Null>.microtask(() {
       if (!mounted) return;
       final LocationManager manager = context.read<LocationManager>();
@@ -37,16 +40,17 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-  bool _compareCameraPosition(MapStore value) {
-    if (value.currentCameraPostion == null || value.currentPosition == null) {
+  bool _compareCameraPosition(MapStore mapStore, PositionStore positionStore) {
+    if (mapStore.currentCameraPostion == null ||
+        positionStore.currentPosition == null) {
       return true;
     }
 
     final double distance = Geolocator.distanceBetween(
-      value.currentCameraPostion!.latitude,
-      value.currentCameraPostion!.longitude,
-      value.currentPosition!.latitude,
-      value.currentPosition!.longitude,
+      mapStore.currentCameraPostion!.latitude,
+      mapStore.currentCameraPostion!.longitude,
+      positionStore.currentPosition!.latitude,
+      positionStore.currentPosition!.longitude,
     );
 
     return distance < 1;
@@ -57,7 +61,7 @@ class _MapScreenState extends State<MapScreen> {
     MapStore mapStore = context.read<MapStore>();
 
     return Scaffold(
-      body: context.watch<MapStore>().currentPosition == null
+      body: context.watch<PositionStore>().currentPosition == null
           ? const Center(
               child: Text('Loading'),
             )
@@ -103,8 +107,6 @@ class _MapScreenState extends State<MapScreen> {
                                     case PanelContentType.locations:
                                       return const Text('Locatiile tale');
                                     case PanelContentType.routeDetails:
-                                      print("CURRENT LOCATION: " +
-                                          mapStore.currentLocation!.address1);
                                       return LocationCard(
                                         address1: mapStore
                                                 .currentLocation?.address1 ??
@@ -171,9 +173,10 @@ class _MapScreenState extends State<MapScreen> {
                   );
                 },
               ),
-              Consumer<MapStore>(
-                builder: (BuildContext context, MapStore value, Widget? child) {
-                  return !_compareCameraPosition(value)
+              Consumer2<MapStore, PositionStore>(
+                builder: (BuildContext context, MapStore mapStore,
+                    PositionStore posStore, Widget? child) {
+                  return !_compareCameraPosition(mapStore, posStore)
                       ? Positioned(
                           bottom: BarDimensions.closedPanelHeight +
                               44 +

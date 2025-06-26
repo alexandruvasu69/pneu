@@ -1,21 +1,18 @@
 import 'package:pneu/shared/models/custom_lat_lng.dart';
+import 'package:pneu/shared/models/custom_screen_position.dart';
 
-abstract class AbstractMapController<T> {
-  late final T _controller;
-
-  AbstractMapController<T> initController(T controller) {
-    this._controller = controller;
-
-    return this;
-  }
-
-  T? getController() {
-    return this._controller;
-  }
+abstract class AbstractMapController {
+  Future<void> init();
 
   Future<void> animateCamera(CustomLatLng position, double zoom);
 
-  Future<void> updateSettings();
-
   Future<void> animateCameraToBound(List<CustomLatLng> boundingBox);
+
+  Future<void> drawRoute(List<CustomLatLng> coords);
+
+  Future<void> clearRoute();
+
+  Future<CustomScreenPosition> getScreenPositionForCoord(CustomLatLng coord);
+
+  Future<void> animateCameraAlongRoute(List<CustomLatLng> coords, double zoom);
 }
