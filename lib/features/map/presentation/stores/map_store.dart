@@ -50,6 +50,7 @@ class MapStore extends ChangeNotifier {
       CustomLatLng realCoords, CustomScreenPosition screenPosition) async {
     await mapController?.animateCamera(realCoords, 16);
 
+    _locationPopupStore.isLocationPopupLoading = true;
     _locationPopupStore.isLocationPopupActive = false;
     _locationPopupStore.locationPopupRealCoordinate = realCoords;
     _locationPopupStore.locationPopupScreenCoordinate = screenPosition;
@@ -83,7 +84,7 @@ class MapStore extends ChangeNotifier {
 
     // 2) Build URL and call your route API
     final Uri url = Uri.parse(
-        '${dotenv.env['SUPABASE_URL']}/rest/v1/rpc/get_full_route_with_events_manual');
+        '${dotenv.env['SUPABASE_URL']}/rest/v1/rpc/get_route_with_loop_fix');
     final http.Response resp = await http.post(
       url,
       // ignore: always_specify_types

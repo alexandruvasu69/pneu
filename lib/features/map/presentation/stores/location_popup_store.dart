@@ -10,14 +10,13 @@ class LocationPopupStore extends ChangeNotifier {
   final GetLocation getLocation;
 
   Location? _selectedLocation;
-  bool _isLocationPopupLoading = true;
+  bool isLocationPopupLoading = true;
   String? _locationPopupError;
   CustomScreenPosition? _locationPopupScreenCoordinate;
   CustomLatLng? _locationPopupRealCoordinate;
   bool _isLocationPopupActive = false;
 
-  Location? get currentLocation => _selectedLocation;
-  bool get isLocationLoading => _isLocationPopupLoading;
+  Location? get selectedLocation => _selectedLocation;
   String? get locationError => _locationPopupError;
   CustomScreenPosition? get locationPopupScreenCoordinate =>
       _locationPopupScreenCoordinate;
@@ -40,7 +39,7 @@ class LocationPopupStore extends ChangeNotifier {
   }
 
   Future<void> loadLocation() async {
-    _isLocationPopupLoading = true;
+    isLocationPopupLoading = true;
     _locationPopupError = null;
     notifyListeners();
 
@@ -54,7 +53,7 @@ class LocationPopupStore extends ChangeNotifier {
       _locationPopupError = e.toString();
     }
 
-    _isLocationPopupLoading = false;
+    isLocationPopupLoading = false;
     notifyListeners();
   }
 }

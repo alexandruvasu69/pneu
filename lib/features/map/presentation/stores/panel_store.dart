@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:pneu/features/map/domain/entities/abstract_panel_controller.dart';
 import 'package:pneu/features/map/enums/panel_content_type.dart';
 
 class PanelStore extends ChangeNotifier {
+  AbstractPanelController? panelController;
+
   bool _isPanelOpen = false;
   bool _isPanelSnapped = false;
   bool _isOpening = false;
@@ -50,6 +53,11 @@ class PanelStore extends ChangeNotifier {
 
   set openPanel(bool value) {
     _openPanel = value;
+    notifyListeners();
+  }
+
+  void initController(AbstractPanelController panelController) {
+    this.panelController = panelController;
     notifyListeners();
   }
 }

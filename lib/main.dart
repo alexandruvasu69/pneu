@@ -12,6 +12,7 @@ import 'package:pneu/features/login/presentation/login_screen.dart';
 import 'package:pneu/features/login/presentation/notifiers/user_notifier.dart';
 import 'package:pneu/features/login/presentation/signup_screen.dart';
 import 'package:pneu/features/map/data/datasources/location_mapbox_geocoding_data_source.dart';
+import 'package:pneu/features/map/data/models/sliding_panel_controller.dart';
 import 'package:pneu/features/map/data/repositories/location_repository_impl.dart';
 import 'package:pneu/features/map/domain/repositories/location_repository.dart';
 import 'package:pneu/features/map/domain/usecases/get_location.dart';
@@ -23,6 +24,7 @@ import 'package:pneu/features/map/presentation/stores/panel_store.dart';
 import 'package:pneu/features/map/presentation/stores/position_store.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
+import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,13 +50,15 @@ void main() async {
   final locationPopupStore = LocationPopupStore(getLocation: getLocation);
   final mapStore = MapStore(locationPopupStore: locationPopupStore);
   final positionStore = PositionStore(mapStore: mapStore);
+  final panelStore = PanelStore();
+  panelStore.initController(SlidingPanelController(PanelController()));
 
   runApp(MultiProvider(
     providers: <SingleChildWidget>[
       ChangeNotifierProvider<LocationPopupStore>.value(
           value: locationPopupStore),
       ChangeNotifierProvider<MapStore>.value(value: mapStore),
-      ChangeNotifierProvider<PanelStore>(create: (_) => PanelStore()),
+      ChangeNotifierProvider<PanelStore>.value(value: panelStore),
       ChangeNotifierProvider<UserNotifier>.value(value: userNotifier),
       ChangeNotifierProvider<PositionStore>.value(
         value: positionStore,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pneu/core/constants/app/footer_constants.dart';
+import 'package:pneu/features/map/data/models/sliding_panel_controller.dart';
 import 'package:pneu/features/map/enums/panel_content_type.dart';
 import 'package:pneu/features/map/presentation/stores/location_popup_store.dart';
 import 'package:pneu/features/map/presentation/stores/map_store.dart';
@@ -32,12 +33,6 @@ class _MapScreenState extends State<MapScreen> {
     super.initState();
 
     context.read<PositionStore>().startPositionStream();
-
-    // Future<Null>.microtask(() {
-    //   if (!mounted) return;
-    //   final LocationManager manager = context.read<LocationManager>();
-    //   manager.initializeCurrentLocation();
-    // });
   }
 
   bool _compareCameraPosition(MapStore mapStore, PositionStore positionStore) {
@@ -69,14 +64,17 @@ class _MapScreenState extends State<MapScreen> {
               Consumer<PanelStore>(
                 builder: (BuildContext context, PanelStore panelStore, _) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (_panelController.isAttached && panelStore.openPanel) {
-                      _panelController.animatePanelToPosition(
+                    if (panelStore.panelController!.isPanelAtached &&
+                        panelStore.openPanel) {
+                      panelStore.panelController!.animatePanelToPosition(
                           panelStore.panelContentType.snapPoint);
                     }
                   });
 
                   return SlidingUpPanel(
-                    controller: _panelController,
+                    controller: (context.read<PanelStore>().panelController
+                            as SlidingPanelController)
+                        .panelController,
                     minHeight: BarDimensions.closedPanelHeight,
                     maxHeight: MediaQuery.of(context).size.height * 0.95,
                     snapPoint: panelStore.panelContentType.snapPoint,
@@ -110,10 +108,10 @@ class _MapScreenState extends State<MapScreen> {
                                     case PanelContentType.routeDetails:
                                       return LocationCard(
                                         address1: locationPopupStore
-                                                .currentLocation?.address1 ??
+                                                .selectedLocation?.address1 ??
                                             'error',
                                         address2: locationPopupStore
-                                                .currentLocation?.address2 ??
+                                                .selectedLocation?.address2 ??
                                             'error',
                                       );
                                     default:

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pneu/core/themes/app_colors.dart';
 import 'package:pneu/features/map/presentation/stores/map_store.dart';
+import 'package:pneu/features/map/presentation/stores/panel_store.dart';
 import 'package:pneu/features/map/presentation/stores/position_store.dart';
 import 'package:provider/provider.dart';
 
@@ -18,10 +19,14 @@ class LocationCard extends StatelessWidget {
       mapStore.centerMapOnCurrentLocation(
           context.read<PositionStore>().currentPosition!);
       mapStore.clearRoute();
+      context.read<PanelStore>().panelController?.closePanel();
+      context.read<PanelStore>().openPanel = false;
     }
 
     void handleOnStartPress() {
       context.read<MapStore>().startRoute();
+      context.read<PanelStore>().panelController?.closePanel();
+      context.read<PanelStore>().openPanel = false;
     }
 
     return Column(

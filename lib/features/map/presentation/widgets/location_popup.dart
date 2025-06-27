@@ -38,67 +38,6 @@ class LocationPopup extends HookWidget {
     final CustomLatLng? realCoord =
         locationPopupStore.locationPopupRealCoordinate;
 
-    Future<void> fetchLocationForCoords() async {
-      _isLoading.value = true;
-
-      try {
-        final CustomLatLng? real =
-            context.read<LocationPopupStore>().locationPopupRealCoordinate;
-        final double lon = real!.longitude;
-        final double lat = real!.latitude;
-        final Uri url = Uri.parse(
-          'https://api.mapbox.com/search/geocode/v6/reverse'
-          '?longitude=$lon&latitude=$lat'
-          '&access_token=${dotenv.env['MAPBOX_ACCESS_TOKEN']}',
-        );
-
-        final dynamic response = await http.get(url);
-        if (response.statusCode != 200) {
-          address1.value = 'Eroare rețea';
-          address2.value = '';
-          return;
-        }
-
-        final Map<String, dynamic> jsonMap =
-            json.decode(response.body) as Map<String, dynamic>;
-        final GeocodingResponse geoResp = GeocodingResponse.fromJson(jsonMap);
-
-        if (geoResp.features.isEmpty) {
-          address1.value = 'Nicio locație găsită';
-          address2.value = '';
-          return;
-        }
-
-        final Feature feature = geoResp.features.first;
-
-        // 1) Linia principală: folosim 'name' (ex. "Strada Mexic 1")
-        address1.value =
-            feature.name.isNotEmpty ? feature.name : feature.fullAddress;
-
-        // 2) Linie secundară: căutăm 'place' → 'region' → 'country'
-        final Map<String, Context> ctx = feature.props.context;
-        String second = '';
-        if (ctx.containsKey('place')) {
-          second = ctx['place']!.name;
-        } else if (ctx.containsKey('region')) {
-          second = ctx['region']!.name;
-        } else if (ctx.containsKey('country')) {
-          second = ctx['country']!.name;
-        } else {
-          // fallback: primul element din map (dacă există)
-          if (ctx.isNotEmpty) second = ctx.values.first.name;
-        }
-        address2.value = second;
-      } catch (e, st) {
-        // Logăm orice excepție neașteptată
-        debugPrint('fetchLocation error: $e\n$st');
-        address1.value = 'Eroare internă';
-        address2.value = '';
-      } finally {
-        _isLoading.value = false;
-      }
-    }
-
     useEffect(() {
       print("IS ACTIVE: " + isActive.toString());
 
@@ -142,25 +81,37 @@ class LocationPopup extends HookWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        context.read<LocationPopupStore>().isLocationLoading
+                        (context
+                                    .read<LocationPopupStore>()
+                                    .isLocationPopupLoading ||
+                                context
+                                        .read<LocationPopupStore>()
+                                        .selectedLocation ==
+                                    null)
                             // Skeleton pentru linia 1
                             ? const SkeletonBox(width: 150, height: 20)
                             : Text(
                                 context
                                     .read<LocationPopupStore>()
-                                    .currentLocation!
+                                    .selectedLocation!
                                     .address1,
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
                                     fontSize: 16, fontWeight: FontWeight.bold),
                               ),
-                        context.read<LocationPopupStore>().isLocationLoading
+                        (context
+                                    .read<LocationPopupStore>()
+                                    .isLocationPopupLoading ||
+                                context
+                                        .read<LocationPopupStore>()
+                                        .selectedLocation ==
+                                    null)
                             // Skeleton pentru linia 2
                             ? const SkeletonBox(width: 100, height: 16)
                             : Text(
                                 context
                                         .read<LocationPopupStore>()
-                                        .currentLocation!
+                                        .selectedLocation!
                                         .address2 ??
                                     'fjjfj',
                                 style: const TextStyle(
@@ -170,13 +121,25 @@ class LocationPopup extends HookWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: <Widget>[
-                            context.read<LocationPopupStore>().isLocationLoading
+                            (context
+                                        .read<LocationPopupStore>()
+                                        .isLocationPopupLoading ||
+                                    context
+                                            .read<LocationPopupStore>()
+                                            .selectedLocation ==
+                                        null)
                                 ? const SkeletonBox(width: 100, height: 25)
                                 : ElevatedButton(
                                     onPressed: onCancel,
                                     child: const Text('Cancel'),
                                   ),
-                            context.read<LocationPopupStore>().isLocationLoading
+                            (context
+                                        .read<LocationPopupStore>()
+                                        .isLocationPopupLoading ||
+                                    context
+                                            .read<LocationPopupStore>()
+                                            .selectedLocation ==
+                                        null)
                                 ? const SkeletonBox(width: 100, height: 25)
                                 : ElevatedButton(
                                     onPressed: onRoutes,
