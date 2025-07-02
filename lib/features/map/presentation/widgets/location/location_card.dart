@@ -18,7 +18,7 @@ class LocationCard extends StatelessWidget {
       MapStore mapStore = context.read<MapStore>();
       mapStore.centerMapOnCurrentLocation(
           context.read<PositionStore>().currentPosition!);
-      mapStore.clearRoute();
+      mapStore.clearAllRoutes();
       context.read<PanelStore>().panelController?.closePanel();
       context.read<PanelStore>().openPanel = false;
     }

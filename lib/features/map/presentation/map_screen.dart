@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:pneu/core/constants/app/footer_constants.dart';
+import 'package:pneu/core/themes/app_colors.dart';
 import 'package:pneu/features/map/data/models/sliding_panel_controller.dart';
 import 'package:pneu/features/map/enums/panel_content_type.dart';
 import 'package:pneu/features/map/presentation/stores/location_popup_store.dart';
 import 'package:pneu/features/map/presentation/stores/map_store.dart';
+import 'package:pneu/features/map/presentation/stores/modal_store.dart';
 import 'package:pneu/features/map/presentation/stores/panel_store.dart';
 import 'package:pneu/features/map/presentation/stores/position_store.dart';
+import 'package:pneu/features/map/presentation/widgets/buttons/action_buttons/specific_action_button.dart';
 import 'package:pneu/features/map/presentation/widgets/buttons/action_buttons_panel.dart';
 import 'package:pneu/features/map/presentation/widgets/buttons/center_button.dart';
 import 'package:pneu/features/map/presentation/widgets/footer.dart';
+import 'package:pneu/features/map/presentation/widgets/general_modal.dart';
 import 'package:pneu/features/map/presentation/widgets/location/location_card.dart';
 import 'package:pneu/features/map/presentation/widgets/map_widget.dart';
 import 'package:pneu/shared/svg_icon_button.dart';
+import 'package:pneu/shared/widgets/buttons/custom_icon_button.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
@@ -175,7 +180,8 @@ class _MapScreenState extends State<MapScreen> {
               Consumer2<MapStore, PositionStore>(
                 builder: (BuildContext context, MapStore mapStore,
                     PositionStore posStore, Widget? child) {
-                  return !_compareCameraPosition(mapStore, posStore)
+                  return (!_compareCameraPosition(mapStore, posStore) &&
+                          !mapStore.isAutoCentering)
                       ? Positioned(
                           bottom: BarDimensions.closedPanelHeight +
                               44 +
@@ -197,6 +203,25 @@ class _MapScreenState extends State<MapScreen> {
                 right: 30,
                 child: const ActionButtonsPanel(),
               ),
+              context.read<MapStore>().isAutoCentering
+                  ? Positioned(
+                      top: 50,
+                      left: 30,
+                      child: CustomIconButton(
+                        assetLocation: 'assets/icons/Cancel.svg',
+                        onTap: () {
+                          context.read<MapStore>().cancelRoute();
+                        },
+                        iconWidth: 20,
+                        iconHeight: 20,
+                        backgroundColor: AppColors.primaryColor,
+                      ),
+                    )
+                  : SizedBox.shrink(),
+              if (context.watch<ModalStore>().isActive)
+                GeneralModal(
+                    child: Text(context.read<ModalStore>().infoText!),
+                    onOkay: () => context.read<ModalStore>().closeModal())
             ]),
     );
   }

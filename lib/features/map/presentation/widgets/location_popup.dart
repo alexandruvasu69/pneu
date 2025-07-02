@@ -39,11 +39,7 @@ class LocationPopup extends HookWidget {
         locationPopupStore.locationPopupRealCoordinate;
 
     useEffect(() {
-      print("IS ACTIVE: " + isActive.toString());
-
-      // dacă s‑a deschis popup-ul sau coord s‑a schimbat
       if (isActive) {
-        // defer until after the build finishes
         WidgetsBinding.instance.addPostFrameCallback((_) {
           context.read<LocationPopupStore>().loadLocation();
         });

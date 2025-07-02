@@ -7,6 +7,7 @@ import 'package:pneu/features/map/presentation/stores/location_popup_store.dart'
 import 'package:pneu/features/map/presentation/stores/map_store.dart';
 import 'package:pneu/features/map/presentation/stores/panel_store.dart';
 import 'package:pneu/features/map/presentation/stores/position_store.dart';
+import 'package:pneu/features/map/presentation/stores/route_store.dart';
 import 'package:pneu/features/map/presentation/widgets/location_popup.dart';
 import 'package:provider/provider.dart';
 
@@ -23,6 +24,8 @@ class _MapWidgetState extends State<MapWidget> {
     void handleCameraChange(mb.CameraChangedEventData cameraChangedEventData) {
       MapStore mapStore = context.read<MapStore>();
 
+      print(cameraChangedEventData.cameraState.zoom);
+
       mb.Position position =
           cameraChangedEventData.cameraState.center.coordinates;
 
@@ -34,48 +37,84 @@ class _MapWidgetState extends State<MapWidget> {
     }
 
     return Scaffold(
-        body: Stack(
-      children: <Widget>[
-        mb.MapWidget(
-          textureView: false,
-          styleUri: 'mapbox://styles/alexandruvasu69/cm9ez0nrk00j401sb2659bjxu',
-          cameraOptions: mb.CameraOptions(
-            center: mb.Point(
-                coordinates: context
-                    .read<PositionStore>()
-                    .currentPosition!
-                    .toMapboxPosition()),
-            zoom: 16,
+        body: Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (_) {
+        context.read<MapStore>().isAutoCentering = false;
+      },
+      child: Stack(
+        children: <Widget>[
+          mb.MapWidget(
+            textureView: false,
+            styleUri:
+                'mapbox://styles/alexandruvasu69/cm9ez0nrk00j401sb2659bjxu',
+            cameraOptions: mb.CameraOptions(
+              center: mb.Point(
+                  coordinates: context
+                      .read<PositionStore>()
+                      .currentPosition!
+                      .toMapboxPosition()),
+              zoom: 16,
+            ),
+            onMapCreated: (mb.MapboxMap mapController) {
+              context
+                  .read<MapStore>()
+                  .initController(MapboxController(mapController));
+            },
+            onCameraChangeListener: handleCameraChange,
+            onLongTapListener: (mb.MapContentGestureContext mapContext) {
+              context.read<MapStore>().centerMapOnLocationPopup(
+                  mapContext.point.coordinates.toCustomLatLng(),
+                  mapContext.touchPosition.toCustomScreenPosition());
+            },
+            onTapListener: (mb.MapContentGestureContext mapContext) {
+              context.read<LocationPopupStore>().isLocationPopupActive = false;
+              context.read<MapStore>().isCentering = false;
+            },
           ),
-          onMapCreated: (mb.MapboxMap mapController) {
-            context
-                .read<MapStore>()
-                .initController(MapboxController(mapController));
-          },
-          onCameraChangeListener: handleCameraChange,
-          onLongTapListener: (mb.MapContentGestureContext mapContext) {
-            context.read<MapStore>().centerMapOnLocationPopup(
-                mapContext.point.coordinates.toCustomLatLng(),
-                mapContext.touchPosition.toCustomScreenPosition());
-          },
-          onTapListener: (mb.MapContentGestureContext mapContext) {
-            context.read<LocationPopupStore>().isLocationPopupActive = false;
-          },
-        ),
-        LocationPopup(
-          onCancel: () {
-            context.read<LocationPopupStore>().isLocationPopupActive = false;
-          },
-          onRoutes: () async {
-            PanelStore panelStore = context.read<PanelStore>();
+          LocationPopup(
+            onCancel: () {
+              context.read<LocationPopupStore>().isLocationPopupActive = false;
+            },
+            onRoutes: () async {
+              PanelStore panelStore = context.read<PanelStore>();
+              final currentPosition =
+                  context.read<PositionStore>().currentPosition;
+              final selectedLocation = context
+                  .read<LocationPopupStore>()
+                  .locationPopupRealCoordinate;
 
-            await context.read<MapStore>().fetchAndDrawRoute(
-                context.read<PositionStore>().currentPosition!);
-            panelStore.panelContentType = PanelContentType.routeDetails;
-            panelStore.openPanel = true;
-          },
-        )
-      ],
+              await context.read<RouteStore>().fetchRoutes(
+                  currentPosition!.latitude,
+                  currentPosition.longitude,
+                  selectedLocation!.latitude,
+                  selectedLocation.longitude);
+
+              print(
+                  'ROUTE OPTIONS: ${context.read<RouteStore>().routeOptions![0].routeSegments.length}');
+
+              await context
+                  .read<MapStore>()
+                  .drawRoutes(context.read<RouteStore>().routeOptions!);
+              panelStore.panelContentType = PanelContentType.routeDetails;
+              panelStore.openPanel = true;
+            },
+          ),
+          if (context.watch<RouteStore>().isLoading)
+            Positioned.fill(
+              child: AbsorbPointer(
+                // poți colore containerul semi-transparent ca feedback vizual
+                child: Container(color: Colors.transparent),
+              ),
+            ),
+
+          // 4) Spinner-ul centrat
+          if (context.watch<RouteStore>().isLoading)
+            const Positioned.fill(
+              child: Center(child: CircularProgressIndicator()),
+            ),
+        ],
+      ),
     ));
   }
 }

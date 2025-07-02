@@ -18,8 +18,11 @@ class _CenterButtonState extends State<CenterButton> {
   @override
   Widget build(BuildContext context) {
     return DottedBorderButton(
-      onTap: () => context.read<MapStore>().centerMapOnCurrentLocation(
-          context.read<PositionStore>().currentPosition!),
+      onTap: () {
+        context.read<MapStore>().isAutoCentering = true;
+        context.read<MapStore>().centerMapOnCurrentLocation(
+            context.read<PositionStore>().currentPosition!);
+      },
       assetLocation: 'assets/icons/Center.svg',
       assetColor: AppColors.primaryAccent,
       borderColor: AppColors.primaryAccent,

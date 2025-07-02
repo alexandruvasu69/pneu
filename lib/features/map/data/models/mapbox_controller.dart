@@ -3,10 +3,12 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart' as geo;
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:pneu/core/constants/app/footer_constants.dart';
 import 'package:pneu/core/utils/conversions.dart';
 import 'package:pneu/features/map/domain/entities/abstract_map_controller.dart';
+import 'package:pneu/features/map/domain/entities/route.dart';
 import 'package:pneu/shared/models/custom_lat_lng.dart';
 import 'package:pneu/shared/models/custom_screen_position.dart';
 
@@ -15,7 +17,6 @@ class MapboxController implements AbstractMapController {
   final MapboxMap _map;
 
   final _sourceId = "route-source";
-  final _layerId = "route-layer";
 
   @override
   Future<void> animateCamera(CustomLatLng position, double zoom) async {
@@ -46,56 +47,187 @@ class MapboxController implements AbstractMapController {
     await annotationManager.create(annotationOptions);
   }
 
-  Future<void> drawRoute(List<CustomLatLng> coords) async {
+  @override
+  Future<void> drawRoute(Route route) async {
     final StyleManager style = _map.style;
+    final routeId = route.routeId;
 
-    // 1) Șterge vechiul layer/source dacă există
-    if (await style.styleLayerExists(_layerId)) {
-      await style.removeStyleLayer(_layerId);
-    }
-    if (await style.styleSourceExists(_sourceId)) {
-      await style.removeStyleSource(_sourceId);
-    }
+    final sourceId = '$_sourceId-$routeId';
+    final streetLayerId = 'street-$routeId';
+    final pedLayerId = 'ped-$routeId';
 
-    // 2) Creează GeoJSON-ul pentru Linia de rută
-    // ignore: always_specify_types
+    // if (await style.styleLayerExists(streetLayerId)) {
+    //   await style.removeStyleLayer(streetLayerId);
+    // }
+    // if (await style.styleLayerExists(pedLayerId)) {
+    //   await style.removeStyleLayer(pedLayerId);
+    // }
+    // if (await style.styleSourceExists(sourceId)) {
+    //   await style.removeStyleSource(sourceId);
+    // }
+
+    final features = route.routeSegments.map((seg) {
+      return {
+        "type": "Feature",
+        "geometry": {
+          "type": "LineString",
+          "coordinates":
+              seg.coordinates.map((c) => [c.longitude, c.latitude]).toList(),
+        },
+        "properties": {
+          "mode": seg.mode, // e.g. "street" or "pedestrian"
+          "highway": seg.highway,
+        }
+      };
+    }).toList();
+
     final featureCollection = {
       "type": "FeatureCollection",
-      // ignore: always_specify_types
-      "features": [
-        // ignore: always_specify_types
-        {
-          "type": "Feature",
-          // ignore: always_specify_types
-          "geometry": {
-            "type": "LineString",
-            // ignore: always_specify_types
-            "coordinates":
-                coords.map((c) => [c.longitude, c.latitude]).toList(),
-          },
-          // ignore: always_specify_types
-          "properties": {}
-        }
-      ]
+      "features": features,
     };
 
-    // 3) Adaugă sursa GeoJSON
     await style.addSource(
       GeoJsonSource(
-        id: _sourceId,
+        id: sourceId,
         data: jsonEncode(featureCollection),
       ),
     );
 
-    // 4) Adaugă layer-ul de tip linie
     await style.addLayer(
       LineLayer(
-        id: _layerId,
-        sourceId: _sourceId,
-        // style your line any way you like:
+        id: streetLayerId,
+        sourceId: sourceId,
+        filter: [
+          "==",
+          ["get", "mode"],
+          "street",
+        ],
+        lineWidthExpression: [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          12,
+          [
+            'match',
+            ['get', 'highway'],
+            'motorway',
+            8,
+            'primary',
+            8,
+            'secondary',
+            8,
+            'tertiary',
+            8,
+            'residential',
+            8,
+            8
+          ],
+          14,
+          [
+            'match',
+            ['get', 'highway'],
+            'motorway',
+            8,
+            'primary',
+            8,
+            'secondary',
+            8,
+            'tertiary',
+            8,
+            'residential',
+            8,
+            8
+          ],
+          16,
+          [
+            'match',
+            ['get', 'highway'],
+            'motorway',
+            8,
+            'primary',
+            8,
+            'secondary',
+            8,
+            'tertiary',
+            8,
+            'residential',
+            8,
+            8
+          ],
+          18,
+          [
+            'match',
+            ['get', 'highway'],
+            'motorway',
+            1,
+            'primary',
+            28,
+            'secondary',
+            28,
+            'tertiary',
+            28,
+            'residential',
+            21,
+            8
+          ],
+          20,
+          [
+            'match',
+            ['get', 'highway'],
+            'motorway',
+            1,
+            'primary',
+            110,
+            'secondary',
+            98,
+            'tertiary',
+            104,
+            'residential',
+            78,
+            8
+          ],
+          22,
+          [
+            'match',
+            ['get', 'highway'],
+            'motorway',
+            1,
+            'primary',
+            280,
+            'secondary',
+            266,
+            'tertiary',
+            266,
+            'residential',
+            200,
+            8
+          ],
+        ],
         lineColor: 0xFF007AFF,
-        lineWidth: 4.0,
+        lineCap: LineCap.ROUND,
         lineOpacity: 0.8,
+        lineOcclusionOpacity: 0,
+        lineJoin: LineJoin.ROUND,
+        lineElevationReference: LineElevationReference.GROUND,
+        // no dasharray → solid
+      ),
+    );
+
+    await style.addLayer(
+      LineLayer(
+        id: pedLayerId,
+        sourceId: sourceId,
+        filter: [
+          "==",
+          ["get", "mode"],
+          "pedestrian",
+        ],
+        lineColor: 0xFF007AFF,
+        lineWidth: 5.0,
+        lineOpacity: 0.8,
+        lineCap: LineCap.ROUND, // capetele liniei rotunjite
+        lineJoin: LineJoin.ROUND,
+        lineDasharray: [1.0, 2.0], // [length of dash, length of gap]
       ),
     );
   }
@@ -143,10 +275,11 @@ class MapboxController implements AbstractMapController {
   }
 
   @override
-  Future<void> clearRoute() async {
+  Future<void> clearRoute(Route route) async {
     final StyleManager style = _map.style;
 
-    await style.removeStyleLayer(_layerId);
+    await style.removeStyleLayer('street-${route.routeId}');
+    await style.removeStyleLayer('ped-${route.routeId}');
   }
 
   @override
@@ -180,21 +313,72 @@ class MapboxController implements AbstractMapController {
     final x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
     var bearing = atan2(y, x) * 180 / pi;
     // normalizează în 0–360
-    return (bearing + 180) % 360;
+    return (bearing + 360) % 360;
   }
 
   @override
   Future<void> animateCameraAlongRoute(
-      List<CustomLatLng> coords, double zoom) async {
+      Route route, CustomLatLng position, int sequence, double zoom) async {
     await _map.easeTo(
       CameraOptions(
           center: Point(
-            coordinates: coords[0].toMapboxPosition(),
+            coordinates: position.toMapboxPosition(),
           ),
           zoom: zoom,
-          bearing: _calculateBearing(coords[0], coords[1]),
-          pitch: 60),
-      MapAnimationOptions(duration: 1500, startDelay: 0),
+          bearing: geo.Geolocator.bearingBetween(
+              position.latitude,
+              position.longitude,
+              route
+                  .routeSegments[sequence]
+                  .coordinates[
+                      route.routeSegments[sequence].coordinates.length - 1]
+                  .latitude,
+              route
+                  .routeSegments[sequence]
+                  .coordinates[
+                      route.routeSegments[sequence].coordinates.length - 1]
+                  .longitude),
+          pitch: 60,
+          padding: MbxEdgeInsets(top: 0, left: 0, bottom: -350, right: 0)),
+      MapAnimationOptions(duration: 100, startDelay: 0),
+    );
+  }
+
+  @override
+  Future<void> clearMultipleRoutes(List<Route> routes) async {
+    final StyleManager style = _map.style;
+
+    for (Route route in routes) {
+      final streetLayerId = 'street-${route.routeId}';
+      final pedLayerId = 'ped-${route.routeId}';
+      final sourceId = '$_sourceId-${route.routeId}';
+      if (await style.styleLayerExists(streetLayerId)) {
+        await style.removeStyleLayer(streetLayerId);
+      }
+
+      if (await style.styleLayerExists(pedLayerId)) {
+        await style.removeStyleLayer(pedLayerId);
+      }
+
+      if (await style.styleSourceExists(sourceId)) {
+        await style.removeStyleSource(sourceId);
+      }
+    }
+  }
+
+  @override
+  Future<void> animateCameraBearing(
+      CustomLatLng position, double bearing, double zoom) async {
+    await _map.easeTo(
+      CameraOptions(
+          center: Point(
+            coordinates: position.toMapboxPosition(),
+          ),
+          zoom: zoom,
+          bearing: bearing,
+          pitch: 60,
+          padding: MbxEdgeInsets(top: 0, left: 0, bottom: -350, right: 0)),
+      MapAnimationOptions(duration: 0, startDelay: 0),
     );
   }
 }
