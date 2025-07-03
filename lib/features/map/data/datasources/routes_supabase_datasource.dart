@@ -32,7 +32,7 @@ class RoutesSupabaseDatasource {
         final body = jsonDecode(response.body);
         return Either.right([body]);
       } else {
-        return Either.left(ServerException(response.statusCode));
+        return Either.left(ServerException(response.body));
       }
     } catch (e) {
       return Either.left(NetworkException(

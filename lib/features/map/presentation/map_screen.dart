@@ -8,12 +8,15 @@ import 'package:pneu/features/map/presentation/stores/map_store.dart';
 import 'package:pneu/features/map/presentation/stores/modal_store.dart';
 import 'package:pneu/features/map/presentation/stores/panel_store.dart';
 import 'package:pneu/features/map/presentation/stores/position_store.dart';
+import 'package:pneu/features/map/presentation/stores/saved_locations_store.dart';
 import 'package:pneu/features/map/presentation/widgets/buttons/action_buttons/specific_action_button.dart';
 import 'package:pneu/features/map/presentation/widgets/buttons/action_buttons_panel.dart';
 import 'package:pneu/features/map/presentation/widgets/buttons/center_button.dart';
 import 'package:pneu/features/map/presentation/widgets/footer.dart';
 import 'package:pneu/features/map/presentation/widgets/general_modal.dart';
-import 'package:pneu/features/map/presentation/widgets/location/location_card.dart';
+import 'package:pneu/features/map/presentation/widgets/location/route_details.dart';
+import 'package:pneu/features/map/presentation/widgets/location/saved_locations.dart';
+import 'package:pneu/features/map/presentation/widgets/location/saved_locations_tab.dart';
 import 'package:pneu/features/map/presentation/widgets/map_widget.dart';
 import 'package:pneu/shared/svg_icon_button.dart';
 import 'package:pneu/shared/widgets/buttons/custom_icon_button.dart';
@@ -85,48 +88,51 @@ class _MapScreenState extends State<MapScreen> {
                     snapPoint: panelStore.panelContentType.snapPoint,
                     borderRadius: BorderRadius.circular(10),
                     // TO-DO: Add container for location widgets
-                    panel: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        SizedBox(
-                          height: BarDimensions.pullIconContainerHeight,
-                          width: MediaQuery.of(context).size.width,
-                          child: SvgIconButton(
-                            asset: 'assets/icons/Pull.svg',
-                            onPressed: () {},
+                    panelBuilder: (sc) {
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          SizedBox(
+                            height: BarDimensions.pullIconContainerHeight,
+                            width: MediaQuery.of(context).size.width,
+                            child: SvgIconButton(
+                              asset: 'assets/icons/Pull.svg',
+                              onPressed: () {},
+                            ),
                           ),
-                        ),
-                        // TO-DO: Add Locations container when panel is Open
-                        // and PullIcon container is over the footer height
-
-                        _panelPosition > 1 / 36
-                            ? Builder(
+                          // TO-DO: Add Locations container when panel is Open
+                          // and PullIcon container is over the footer height
+                          if (_panelPosition > 1 / 36)
+                            Expanded(
+                              child: Builder(
                                 builder: (context) {
                                   final locationPopupStore =
                                       context.watch<LocationPopupStore>();
+                                  final savedLocationsStore =
+                                      context.watch<SavedLocationsStore>();
 
                                   switch (panelStore.panelContentType) {
                                     case PanelContentType.events:
                                       return const Text('Evenimente în zona');
                                     case PanelContentType.locations:
-                                      return const Text('Locatiile tale');
+                                      return SavedLocationsTab(
+                                        scrollController: sc,
+                                      );
                                     case PanelContentType.routeDetails:
-                                      return LocationCard(
-                                        address1: locationPopupStore
-                                                .selectedLocation?.address1 ??
-                                            'error',
-                                        address2: locationPopupStore
-                                                .selectedLocation?.address2 ??
-                                            'error',
+                                      return RouteDetails(
+                                        location:
+                                            locationPopupStore.selectedLocation,
                                       );
                                     default:
                                       return const SizedBox.shrink();
                                   }
                                 },
-                              )
-                            : const SizedBox.shrink(),
-                      ],
-                    ),
+                              ),
+                            )
+                        ],
+                      );
+                    },
+
                     body: const MapWidget(),
                     footer: Footer(panelPosition: _panelPosition),
                     onPanelClosed: () {

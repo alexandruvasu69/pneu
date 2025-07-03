@@ -67,7 +67,6 @@ class PositionStore extends ChangeNotifier {
 
     FlutterCompass.events!.listen((CompassEvent event) {
       bearing = event.heading;
-      print("NORTH BEARING: ${bearing}");
       notifyListeners();
     });
   }

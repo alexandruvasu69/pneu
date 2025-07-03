@@ -148,12 +148,13 @@ class LocationPopup extends HookWidget {
                   ),
                 ),
                 // Săgeata (triunghiul)
-                // Positioned(
-                //   child: CustomPaint(
-                //     size: const Size(20, 10),
-                //     painter: _TrianglePainter(color: Colors.white, elevation: 5),
-                //   ),
-                // ),
+                Positioned(
+                  child: CustomPaint(
+                    size: const Size(20, 10),
+                    painter:
+                        _TrianglePainter(color: Colors.white, elevation: 5),
+                  ),
+                ),
               ],
             ),
           ),
@@ -164,42 +165,43 @@ class LocationPopup extends HookWidget {
 }
 
 // CustomPainter care desenează un triunghi
-// class _TrianglePainter extends CustomPainter {
-//   _TrianglePainter({
-//     this.color = Colors.white,
-//     this.elevation = 4.0,
-//   });
+class _TrianglePainter extends CustomPainter {
+  _TrianglePainter({
+    this.color = Colors.white,
+    this.elevation = 4.0,
+  });
 
-//   final Color color;
-//   final double elevation; // cât de “înaltă” e umbra
+  final Color color;
+  final double elevation; // cât de “înaltă” e umbra
 
-//   @override
-//   void paint(Canvas canvas, Size size) {
-//     final Paint paint = Paint()..color = color;
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()..color = color;
 
-//     // 1. Definim forma triunghiului
-//     final Path path = Path()
-//       ..moveTo(0, 0)
-//       ..lineTo(size.width, 0)
-//       ..lineTo(size.width / 2, size.height)
-//       ..close();
+    // 1. Definim forma triunghiului
+    final Path path = Path()
+      ..moveTo(0, 0)
+      ..lineTo(size.width, 0)
+      ..lineTo(size.width / 2, size.height)
+      ..close();
 
-//     // 2. Tragem umbra
-//     //    - path: forma
-//     //    - color: culoarea umbrei
-//     //    - elevation: “înălțimea” umbrei (cu cât e mai mare, cu atât e mai difuză)
-//     //    - transparentOccluder: true ca să se comporte ca un obiect opac
-//     canvas.drawShadow(
-//       path,
-//       Colors.black.withOpacity(0.25),
-//       elevation,
-//       true,
-//     );
+    // 2. Tragem umbra
+    //    - path: forma
+    //    - color: culoarea umbrei
+    //    - elevation: “înălțimea” umbrei (cu cât e mai mare, cu atât e mai difuză)
+    //    - transparentOccluder: true ca să se comporte ca un obiect opac
+    canvas.drawShadow(
+      path,
+      Colors.black.withOpacity(0.25),
+      elevation,
+      true,
+    );
 
-//     // 3. Tragem triunghiul
-//     canvas.drawPath(path, paint);
-//   }
+    // 3. Tragem triunghiul
+    canvas.drawPath(path, paint);
+  }
 
-//   @override
-//   bool shouldRepaint(_TrianglePainter old) => old.color != color || old.elevation != elevation;
-// }
+  @override
+  bool shouldRepaint(_TrianglePainter old) =>
+      old.color != color || old.elevation != elevation;
+}

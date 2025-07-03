@@ -5,13 +5,20 @@ import 'package:pneu/features/login/domain/entities/user.dart';
 import 'package:pneu/features/login/domain/usecases/get_user.dart';
 import 'package:pneu/features/login/domain/usecases/login.dart';
 import 'package:pneu/features/login/domain/usecases/register.dart';
+import 'package:pneu/features/map/presentation/stores/saved_locations_store.dart';
 
 class UserNotifier extends ChangeNotifier {
-  UserNotifier({required this.getUser, required this.login, required this.register});
+  UserNotifier({
+    required this.getUser,
+    required this.login,
+    required this.register,
+    required SavedLocationsStore savedLocationsStore,
+  }) : _savedLocationsStore = savedLocationsStore;
 
   final GetUser getUser;
   final Login login;
   final Register register;
+  final SavedLocationsStore _savedLocationsStore;
 
   User? _currentUser;
   bool _isLoading = true;
@@ -28,12 +35,13 @@ class UserNotifier extends ChangeNotifier {
 
     try {
       _currentUser = await getUser();
+      print("USER: ${_currentUser!.id}");
+      if (_currentUser != null) {
+        await _savedLocationsStore.getSavedLocations(_currentUser!);
+      }
     } catch (e) {
       _error = e.toString();
     }
-
-    print(jsonEncode(_currentUser?.toJson()));
-    print(_error);
 
     _isLoading = false;
     notifyListeners();
@@ -50,6 +58,9 @@ class UserNotifier extends ChangeNotifier {
 
     try {
       _currentUser = await register(email, password);
+      if (_currentUser != null) {
+        await _savedLocationsStore.getSavedLocations(_currentUser!);
+      }
     } catch (e) {
       _error = e.toString();
     }
@@ -68,6 +79,9 @@ class UserNotifier extends ChangeNotifier {
 
     try {
       _currentUser = await login(email, password);
+      if (_currentUser != null) {
+        await _savedLocationsStore.getSavedLocations(_currentUser!);
+      }
     } catch (e) {
       _error = e.toString();
     }

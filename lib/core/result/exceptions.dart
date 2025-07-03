@@ -12,7 +12,8 @@ class NetworkException extends AppException {
 }
 
 class ServerException extends AppException {
-  ServerException(int statusCode) : super('Server returned HTTP ${statusCode}');
+  ServerException(String statusCode)
+      : super('Server returned HTTP ${statusCode}');
 }
 
 class ParsingException extends AppException {
