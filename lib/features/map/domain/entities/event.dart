@@ -5,19 +5,19 @@ abstract class Event {
     required this.id,
     required this.subtypeId,
     required this.edgeId,
-    required this.description,
+    this.description,
     required this.geometry,
     required this.status,
-    required this.createdAt,
+    this.createdAt,
     required this.createdBy,
   });
 
   final int id;
   final int subtypeId;
   final int edgeId;
-  final String description;
+  final String? description;
   final CustomLatLng geometry;
   final String status;
-  final DateTime createdAt;
+  final String? createdAt;
   final String createdBy;
 }

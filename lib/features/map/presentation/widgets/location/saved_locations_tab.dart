@@ -46,8 +46,8 @@ class SavedLocationsTab extends StatelessWidget {
             await context
                 .read<MapStore>()
                 .drawRoutes(context.read<RouteStore>().routeOptions!);
-            panelStore.panelContentType = PanelContentType.routeDetails;
-            panelStore.openPanel = true;
+
+            await panelStore.snapPanel(PanelContentType.routeDetails);
           },
         );
       },

@@ -6,8 +6,10 @@ import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart' as geo;
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:pneu/core/constants/app/footer_constants.dart';
+import 'package:pneu/core/themes/app_colors.dart';
 import 'package:pneu/core/utils/conversions.dart';
 import 'package:pneu/features/map/domain/entities/abstract_map_controller.dart';
+import 'package:pneu/features/map/domain/entities/event.dart';
 import 'package:pneu/features/map/domain/entities/route.dart';
 import 'package:pneu/shared/models/custom_lat_lng.dart';
 import 'package:pneu/shared/models/custom_screen_position.dart';
@@ -15,6 +17,8 @@ import 'package:pneu/shared/models/custom_screen_position.dart';
 class MapboxController implements AbstractMapController {
   MapboxController(this._map);
   final MapboxMap _map;
+  late final PointAnnotationManager _eventAnnotationManager;
+  late final CircleAnnotationManager _circleManager;
 
   final _sourceId = "route-source";
 
@@ -260,7 +264,7 @@ class MapboxController implements AbstractMapController {
         MbxEdgeInsets(
           top: 100,
           left: 50,
-          bottom: BarDimensions.closedPanelHeight + 220,
+          bottom: BarDimensions.closedPanelHeight + 250,
           right: 50,
         ),
         null,
@@ -293,6 +297,15 @@ class MapboxController implements AbstractMapController {
       enabled: true,
       pulsingEnabled: true,
     ));
+    await _initEventAnnotations();
+
+    _circleManager = await _map.annotations
+        .createCircleAnnotationManager(below: 'image-layer');
+  }
+
+  Future<void> _initEventAnnotations() async {
+    _eventAnnotationManager =
+        await _map.annotations.createPointAnnotationManager(id: 'image-layer');
   }
 
   @override
@@ -380,5 +393,80 @@ class MapboxController implements AbstractMapController {
           padding: MbxEdgeInsets(top: 0, left: 0, bottom: -350, right: 0)),
       MapAnimationOptions(duration: 0, startDelay: 0),
     );
+  }
+
+  @override
+  Future<List<CustomLatLng>> getCoordinateBoundsForCamera(
+      MapCameraOptions cameraOptions) async {
+    final mbxCameraOptions = _convertToMbxCameraOptions(cameraOptions);
+    final bounds = await _map.coordinateBoundsForCamera(mbxCameraOptions);
+    final ne = bounds.northeast.coordinates;
+    final sw = bounds.southwest.coordinates;
+
+    return <CustomLatLng>[sw.toCustomLatLng(), ne.toCustomLatLng()];
+  }
+
+  CameraOptions _convertToMbxCameraOptions(MapCameraOptions cameraOptions) {
+    return CameraOptions(
+      center: cameraOptions.center != null
+          ? Point(coordinates: cameraOptions.center!.toMapboxPosition())
+          : null,
+      bearing: cameraOptions.bearing,
+      pitch: cameraOptions.pitch,
+      padding: cameraOptions.padding != null
+          ? MbxEdgeInsets(
+              top: cameraOptions.padding!.top,
+              left: cameraOptions.padding!.left,
+              bottom: cameraOptions.padding!.bottom,
+              right: cameraOptions.padding!.right,
+            )
+          : null,
+      anchor: cameraOptions.anchor?.toMapboxScreenCoordinate(),
+    );
+  }
+
+  @override
+  Future<void> showEventsOnMap(List<Event> events, double zoom) async {
+    await _circleManager.deleteAll();
+    await _eventAnnotationManager.deleteAll();
+
+    final circleOptions = events.map((e) {
+      return CircleAnnotationOptions(
+        geometry: Point(coordinates: e.geometry.toMapboxPosition()),
+        circleRadius: zoom > 14 ? 16.0 : 5.0,
+        circleColor: 0xFFCA3535,
+        circleOpacity: 0.9,
+        circleStrokeWidth: 2.0,
+        circleStrokeColor: 0xFF8A59DE,
+      );
+    }).toList();
+    await _circleManager.createMulti(circleOptions);
+
+    final bytes = await rootBundle.load('assets/icons/attention-triangle.png');
+    final Uint8List iconData = bytes.buffer.asUint8List();
+
+    final annotations = events.map((e) {
+      return PointAnnotationOptions(
+        geometry: Point(coordinates: e.geometry.toMapboxPosition()),
+        image: iconData,
+        iconSize: 1.0,
+      );
+    }).toList();
+
+    if (zoom > 14) await _eventAnnotationManager.createMulti(annotations);
+  }
+
+  Future<List<CircleAnnotationOptions>> createCircleOptions(
+      List<Event> events) async {
+    return events.map((e) {
+      return CircleAnnotationOptions(
+        geometry: Point(coordinates: e.geometry.toMapboxPosition()),
+        circleRadius: 16.0,
+        circleColor: 0xFFFFFFFF,
+        circleOpacity: 0.9,
+        circleStrokeWidth: 2.0,
+        circleStrokeColor: 0xFF007AFF,
+      );
+    }).toList();
   }
 }

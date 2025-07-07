@@ -9,13 +9,11 @@ import 'package:pneu/features/map/presentation/stores/modal_store.dart';
 import 'package:pneu/features/map/presentation/stores/panel_store.dart';
 import 'package:pneu/features/map/presentation/stores/position_store.dart';
 import 'package:pneu/features/map/presentation/stores/saved_locations_store.dart';
-import 'package:pneu/features/map/presentation/widgets/buttons/action_buttons/specific_action_button.dart';
 import 'package:pneu/features/map/presentation/widgets/buttons/action_buttons_panel.dart';
 import 'package:pneu/features/map/presentation/widgets/buttons/center_button.dart';
 import 'package:pneu/features/map/presentation/widgets/footer.dart';
 import 'package:pneu/features/map/presentation/widgets/general_modal.dart';
 import 'package:pneu/features/map/presentation/widgets/location/route_details.dart';
-import 'package:pneu/features/map/presentation/widgets/location/saved_locations.dart';
 import 'package:pneu/features/map/presentation/widgets/location/saved_locations_tab.dart';
 import 'package:pneu/features/map/presentation/widgets/map_widget.dart';
 import 'package:pneu/shared/svg_icon_button.dart';
@@ -33,7 +31,6 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  double _panelPosition = 0.0;
   final PanelController _panelController = PanelController();
 
   @override
@@ -56,12 +53,18 @@ class _MapScreenState extends State<MapScreen> {
       positionStore.currentPosition!.longitude,
     );
 
-    return distance < 1;
+    return distance < 3;
   }
 
   @override
   Widget build(BuildContext context) {
     MapStore mapStore = context.read<MapStore>();
+    PanelStore panelStore = context.watch<PanelStore>();
+    double bottomPosition = BarDimensions.closedPanelHeight +
+        44 +
+        panelStore.position *
+            (MediaQuery.of(context).size.height * 0.95 -
+                BarDimensions.closedPanelHeight);
 
     return Scaffold(
       body: context.watch<PositionStore>().currentPosition == null
@@ -69,119 +72,72 @@ class _MapScreenState extends State<MapScreen> {
               child: Text('Loading'),
             )
           : Stack(children: <Widget>[
-              Consumer<PanelStore>(
-                builder: (BuildContext context, PanelStore panelStore, _) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (panelStore.panelController!.isPanelAtached &&
-                        panelStore.openPanel) {
-                      panelStore.panelController!.animatePanelToPosition(
-                          panelStore.panelContentType.snapPoint);
-                    }
-                  });
-
-                  return SlidingUpPanel(
-                    controller: (context.read<PanelStore>().panelController
-                            as SlidingPanelController)
+              SlidingUpPanel(
+                controller:
+                    (panelStore.panelController as SlidingPanelController)
                         .panelController,
-                    minHeight: BarDimensions.closedPanelHeight,
-                    maxHeight: MediaQuery.of(context).size.height * 0.95,
-                    snapPoint: panelStore.panelContentType.snapPoint,
-                    borderRadius: BorderRadius.circular(10),
-                    // TO-DO: Add container for location widgets
-                    panelBuilder: (sc) {
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          SizedBox(
-                            height: BarDimensions.pullIconContainerHeight,
-                            width: MediaQuery.of(context).size.width,
-                            child: SvgIconButton(
-                              asset: 'assets/icons/Pull.svg',
-                              onPressed: () {},
-                            ),
+                minHeight: BarDimensions.closedPanelHeight,
+                maxHeight: MediaQuery.of(context).size.height * 0.95,
+                snapPoint: panelStore.panelContentType.snapPoint,
+                borderRadius: BorderRadius.circular(10),
+                isDraggable: !panelStore.isPanelLocked,
+                onPanelSlide: (double position) {
+                  panelStore.position = position;
+                },
+                onPanelClosed: () async {
+                  if (panelStore.panelContentType ==
+                          PanelContentType.locations ||
+                      panelStore.panelContentType == PanelContentType.events) {
+                    await panelStore.closePanel();
+                  }
+                },
+                // TO-DO: Add container for location widgets
+                panelBuilder: (sc) {
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      SizedBox(
+                        height: BarDimensions.pullIconContainerHeight,
+                        width: MediaQuery.of(context).size.width,
+                        child: SvgIconButton(
+                          asset: 'assets/icons/Pull.svg',
+                          onPressed: () {},
+                        ),
+                      ),
+                      // TO-DO: Add Locations container when panel is Open
+                      // and PullIcon container is over the footer height
+                      if (panelStore.position > 1 / 36)
+                        Expanded(
+                          child: Builder(
+                            builder: (context) {
+                              final locationPopupStore =
+                                  context.watch<LocationPopupStore>();
+                              final savedLocationsStore =
+                                  context.watch<SavedLocationsStore>();
+
+                              switch (panelStore.panelContentType) {
+                                case PanelContentType.events:
+                                  return const Text('Evenimente în zona');
+                                case PanelContentType.locations:
+                                  return SavedLocationsTab(
+                                    scrollController: sc,
+                                  );
+                                case PanelContentType.routeDetails:
+                                  return RouteDetails(
+                                    location:
+                                        locationPopupStore.selectedLocation,
+                                  );
+                                default:
+                                  return const SizedBox.shrink();
+                              }
+                            },
                           ),
-                          // TO-DO: Add Locations container when panel is Open
-                          // and PullIcon container is over the footer height
-                          if (_panelPosition > 1 / 36)
-                            Expanded(
-                              child: Builder(
-                                builder: (context) {
-                                  final locationPopupStore =
-                                      context.watch<LocationPopupStore>();
-                                  final savedLocationsStore =
-                                      context.watch<SavedLocationsStore>();
-
-                                  switch (panelStore.panelContentType) {
-                                    case PanelContentType.events:
-                                      return const Text('Evenimente în zona');
-                                    case PanelContentType.locations:
-                                      return SavedLocationsTab(
-                                        scrollController: sc,
-                                      );
-                                    case PanelContentType.routeDetails:
-                                      return RouteDetails(
-                                        location:
-                                            locationPopupStore.selectedLocation,
-                                      );
-                                    default:
-                                      return const SizedBox.shrink();
-                                  }
-                                },
-                              ),
-                            )
-                        ],
-                      );
-                    },
-
-                    body: const MapWidget(),
-                    footer: Footer(panelPosition: _panelPosition),
-                    onPanelClosed: () {
-                      if (!panelStore.openPanel) {
-                        panelStore.panelContentType =
-                            PanelContentType.locations;
-                        panelStore.isPanelSnapped = false;
-                        panelStore.isClosing = false;
-                        panelStore.isOpening = false;
-                      } else {
-                        panelStore.openPanel = false;
-                      }
-                    },
-                    onPanelSlide: (double position) {
-                      if (position > panelStore.position) {
-                        panelStore.isClosing = false;
-                        panelStore.isOpening = true;
-                        panelStore.isPanelSnapped = false;
-                      } else if (position < panelStore.position) {
-                        panelStore.isClosing = true;
-                        panelStore.isOpening = false;
-                        panelStore.isPanelSnapped = false;
-                      }
-
-                      if (position == panelStore.panelContentType.snapPoint &&
-                          position == panelStore.position) {
-                        print('PANEL IS SNAPPED');
-                        panelStore.isPanelSnapped = true;
-                        panelStore.isClosing = false;
-                        panelStore.isOpening = false;
-                      }
-
-                      if (position == 0 && panelStore.isClosing) {
-                        panelStore.isClosing = false;
-                        panelStore.isOpening = false;
-                      }
-
-                      panelStore.position = position;
-
-                      setState(() {
-                        _panelPosition = position;
-                      });
-
-                      //   PanelControllerManager panelManager = context.read<PanelControllerManager>();
-
-                      //   _panelPosition > 0 ? panelManager.openPanel() : panelManager.closePanel();
-                    },
+                        )
+                    ],
                   );
                 },
+                body: const MapWidget(),
+                footer: Footer(panelPosition: panelStore.position),
               ),
               Consumer2<MapStore, PositionStore>(
                 builder: (BuildContext context, MapStore mapStore,
@@ -189,11 +145,7 @@ class _MapScreenState extends State<MapScreen> {
                   return (!_compareCameraPosition(mapStore, posStore) &&
                           !mapStore.isAutoCentering)
                       ? Positioned(
-                          bottom: BarDimensions.closedPanelHeight +
-                              44 +
-                              _panelPosition *
-                                  (MediaQuery.of(context).size.height * 0.95 -
-                                      BarDimensions.closedPanelHeight),
+                          bottom: bottomPosition,
                           left: 30,
                           child: const CenterButton(),
                         )
@@ -201,11 +153,7 @@ class _MapScreenState extends State<MapScreen> {
                 },
               ),
               Positioned(
-                bottom: BarDimensions.closedPanelHeight +
-                    44 +
-                    _panelPosition *
-                        (MediaQuery.of(context).size.height * 0.95 -
-                            BarDimensions.closedPanelHeight),
+                bottom: bottomPosition,
                 right: 30,
                 child: const ActionButtonsPanel(),
               ),

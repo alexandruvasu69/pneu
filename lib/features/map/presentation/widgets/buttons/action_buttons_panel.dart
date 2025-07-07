@@ -30,15 +30,13 @@ class _ActionButtonsPanelState extends State<ActionButtonsPanel> {
 
   @override
   Widget build(BuildContext context) {
-    context.watch<PanelStore>().openPanel
-        ? isGeneralActionButtonActive = false
-        : null;
+    final panelStore = context.watch<PanelStore>();
+
+    !panelStore.isPanelClosed ? isGeneralActionButtonActive = false : null;
 
     return Column(
       children: <Widget>[
-        ...(isGeneralActionButtonActive &&
-                !context.watch<PanelStore>().isOpening &&
-                !context.watch<PanelStore>().isPanelSnapped)
+        ...(isGeneralActionButtonActive)
             ? <Widget>[
                 DelayedAnimatedButton(
                   delay: const Duration(milliseconds: 150),
@@ -47,38 +45,43 @@ class _ActionButtonsPanelState extends State<ActionButtonsPanel> {
                     onTap: () {
                       PanelStore panelStore = context.read<PanelStore>();
 
-                      panelStore.panelContentType = PanelContentType.events;
-                      panelStore.openPanel = true;
+                      panelStore.snapPanel(PanelContentType.events);
                     },
                     buttonWidth: 80,
                     buttonHeight: 40,
                   ),
                 ),
                 const SizedBox(height: 10),
-                const DelayedAnimatedButton(
+                DelayedAnimatedButton(
                   delay: Duration(milliseconds: 100),
                   child: SpecificActionButton(
+                    category: 1,
                     assetLocation: 'assets/icons/Attention.svg',
                     iconWidth: 60,
                     iconHeight: 60,
+                    onTap: () => handleGeneralActionButtonClick(context),
                   ),
                 ),
                 const SizedBox(height: 10),
-                const DelayedAnimatedButton(
+                DelayedAnimatedButton(
                   delay: Duration(milliseconds: 50),
                   child: SpecificActionButton(
+                    category: 2,
                     assetLocation: 'assets/icons/Speed.svg',
                     iconWidth: 60,
                     iconHeight: 32,
+                    onTap: () => handleGeneralActionButtonClick(context),
                   ),
                 ),
                 const SizedBox(height: 10),
-                const DelayedAnimatedButton(
+                DelayedAnimatedButton(
                   delay: Duration(milliseconds: 0),
                   child: SpecificActionButton(
+                    category: 3,
                     assetLocation: 'assets/icons/StoppedCar.svg',
                     iconWidth: 60,
                     iconHeight: 38,
+                    onTap: () => handleGeneralActionButtonClick(context),
                   ),
                 ),
                 const SizedBox(height: 10),

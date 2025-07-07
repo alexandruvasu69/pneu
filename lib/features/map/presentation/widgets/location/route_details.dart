@@ -21,14 +21,13 @@ class RouteDetails extends StatelessWidget {
       mapStore.centerMapOnCurrentLocation(
           context.read<PositionStore>().currentPosition!);
       mapStore.clearAllRoutes();
-      context.read<PanelStore>().panelController?.closePanel();
-      context.read<PanelStore>().openPanel = false;
+      context.read<PanelStore>().closePanel();
     }
 
     void handleOnStartPress() {
       context.read<MapStore>().startRoute();
-      context.read<PanelStore>().panelController?.closePanel();
-      context.read<PanelStore>().openPanel = false;
+
+      context.read<PanelStore>().closePanel();
     }
 
     final savedLocationStore = context.watch<SavedLocationsStore>();

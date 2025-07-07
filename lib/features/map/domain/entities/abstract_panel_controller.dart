@@ -1,7 +1,8 @@
 abstract class AbstractPanelController {
   bool get isPanelAtached;
-  void animatePanelToPosition(double position);
-  void openPanel();
-  void closePanel();
+  Future<void> animatePanelToPosition(double position);
+  Future<void> openPanel();
+  Future<void> closePanel();
+  double get panelPosition;
   Object getPanel();
 }

@@ -6,21 +6,21 @@ class SlidingPanelController implements AbstractPanelController {
   PanelController panelController;
 
   @override
-  void animatePanelToPosition(double position) {
-    panelController.animatePanelToPosition(position);
+  Future<void> animatePanelToPosition(double position) async {
+    await panelController.animatePanelToPosition(position);
   }
 
   @override
-  void closePanel() {
-    panelController.close();
+  Future<void> closePanel() async {
+    await panelController.close();
   }
 
   @override
   bool get isPanelAtached => panelController.isAttached;
 
   @override
-  void openPanel() {
-    panelController.open();
+  Future<void> openPanel() async {
+    await panelController.open();
   }
 
   @override
@@ -31,4 +31,7 @@ class SlidingPanelController implements AbstractPanelController {
   PanelController? getPanelInstance() {
     return panelController;
   }
+
+  @override
+  double get panelPosition => panelController.panelPosition;
 }

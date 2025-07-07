@@ -12,23 +12,29 @@ import 'package:pneu/features/login/domain/usecases/register.dart';
 import 'package:pneu/features/login/presentation/login_screen.dart';
 import 'package:pneu/features/login/presentation/notifiers/user_notifier.dart';
 import 'package:pneu/features/login/presentation/signup_screen.dart';
+import 'package:pneu/features/map/data/datasources/events_supabase_datasource.dart';
 import 'package:pneu/features/map/data/datasources/location_mapbox_geocoding_data_source.dart';
 import 'package:pneu/features/map/data/datasources/routes_supabase_datasource.dart';
 import 'package:pneu/features/map/data/datasources/saved_locations_supabase_datasource.dart';
 import 'package:pneu/features/map/data/models/sliding_panel_controller.dart';
+import 'package:pneu/features/map/data/repositories/events_repository_impl.dart';
 import 'package:pneu/features/map/data/repositories/location_repository_impl.dart';
 import 'package:pneu/features/map/data/repositories/route_repository_impl.dart';
 import 'package:pneu/features/map/data/repositories/saved_location_repository_impl.dart';
+import 'package:pneu/features/map/domain/repositories/events_repository.dart';
 import 'package:pneu/features/map/domain/repositories/location_repository.dart';
 import 'package:pneu/features/map/domain/repositories/route_repository.dart';
 import 'package:pneu/features/map/domain/repositories/saved_location_repository.dart';
+import 'package:pneu/features/map/domain/usecases/add_event.dart';
 import 'package:pneu/features/map/domain/usecases/delete_saved_location.dart';
 import 'package:pneu/features/map/domain/usecases/get_calculated_routes.dart';
+import 'package:pneu/features/map/domain/usecases/get_events_for_bounds.dart';
 import 'package:pneu/features/map/domain/usecases/get_location.dart';
 import 'package:pneu/features/map/domain/usecases/get_saved_locations.dart';
 import 'package:pneu/features/map/domain/usecases/save_location.dart';
 import 'package:pneu/features/map/presentation/map_screen.dart';
 import 'package:pneu/core/themes/app_theme.dart';
+import 'package:pneu/features/map/presentation/stores/events_store.dart';
 import 'package:pneu/features/map/presentation/stores/location_popup_store.dart';
 import 'package:pneu/features/map/presentation/stores/map_store.dart';
 import 'package:pneu/features/map/presentation/stores/modal_store.dart';
@@ -73,6 +79,8 @@ void main() async {
   final panelStore = PanelStore();
   panelStore.initController(SlidingPanelController(PanelController()));
 
+  final eventsStore = initEventsStore();
+
   runApp(MultiProvider(
     providers: <SingleChildWidget>[
       ChangeNotifierProvider<ModalStore>.value(value: modalStore),
@@ -85,6 +93,7 @@ void main() async {
       ChangeNotifierProvider<RouteStore>.value(value: routeStore),
       ChangeNotifierProvider<SavedLocationsStore>.value(
           value: savedLocationsStore),
+      ChangeNotifierProvider<EventsStore>.value(value: eventsStore),
     ],
     child: MaterialApp(
       theme: AppTheme.lightTheme,
@@ -101,6 +110,15 @@ Future<void> _setup() async {
   await dotenv.load(fileName: '.env');
 
   MapboxOptions.setAccessToken(dotenv.env['MAPBOX_ACCESS_TOKEN']!);
+}
+
+EventsStore initEventsStore() {
+  EventsSupabaseDatasource datasource = EventsSupabaseDatasource();
+  EventsRepository eventsRepository = EventsRepositoryImpl(datasource);
+  GetEventsForBounds getEventsForBounds = GetEventsForBounds(eventsRepository);
+  AddEvent addEvent = AddEvent(eventsRepository);
+  return EventsStore(
+      getEventsForBounds: getEventsForBounds, addEvent: addEvent);
 }
 
 SavedLocationsStore initSavedLocationsStore(ModalStore modalStore) {

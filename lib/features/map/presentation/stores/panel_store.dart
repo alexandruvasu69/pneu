@@ -4,55 +4,45 @@ import 'package:pneu/features/map/enums/panel_content_type.dart';
 
 class PanelStore extends ChangeNotifier {
   AbstractPanelController? panelController;
-
-  bool _isPanelOpen = false;
-  bool _isPanelSnapped = false;
-  bool _isOpening = false;
-  bool _isClosing = false;
+  bool _isPanelLocked = false;
   double _position = 0;
-  bool _openPanel = false;
+
   PanelContentType _panelContentType = PanelContentType.locations;
 
-  bool get isPanelOpen => _isPanelOpen;
-  bool get isPanelSnapped => _isPanelSnapped;
-  bool get isOpening => _isOpening;
-  bool get isClosing => _isClosing;
   double get position => _position;
-  bool get openPanel => _openPanel;
-  PanelContentType get panelContentType => _panelContentType;
-
-  set isPanelOpen(bool value) {
-    _isPanelOpen = value;
-    notifyListeners();
-  }
-
-  set isPanelSnapped(bool value) {
-    _isPanelSnapped = value;
-    notifyListeners();
-  }
-
-  set isOpening(bool value) {
-    _isOpening = value;
-    notifyListeners();
-  }
-
-  set isClosing(bool value) {
-    _isClosing = value;
-    notifyListeners();
-  }
-
   set position(double position) {
     _position = position;
     notifyListeners();
   }
 
-  set panelContentType(PanelContentType value) {
-    _panelContentType = value;
+  bool get isPanelClosed => _position == 0;
+
+  bool get isPanelLocked => _isPanelLocked;
+  PanelContentType get panelContentType => _panelContentType;
+
+  Future<void> snapPanel(
+      [PanelContentType panelContentType = PanelContentType.locations]) async {
+    print("OPEN PANEL: ${position}");
+    _panelContentType = panelContentType;
+    notifyListeners();
+    await panelController?.animatePanelToPosition(panelContentType.snapPoint);
+    _isPanelLocked = panelContentType.isLocked;
+
     notifyListeners();
   }
 
-  set openPanel(bool value) {
-    _openPanel = value;
+  Future<void> closePanel() async {
+    _isPanelLocked = false;
+    notifyListeners();
+    await panelController?.closePanel();
+    _panelContentType = PanelContentType.locations;
+
+    notifyListeners();
+  }
+
+  Future<void> openPanel(
+      [PanelContentType panelContentType = PanelContentType.locations]) async {
+    await panelController?.openPanel();
     notifyListeners();
   }
 

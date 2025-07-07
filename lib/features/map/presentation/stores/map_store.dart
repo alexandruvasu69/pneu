@@ -5,10 +5,13 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geodesy/geodesy.dart' as geodesy;
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:pneu/core/utils/conversions.dart';
 import 'package:pneu/features/map/data/models/mapbox_controller.dart';
 import 'package:pneu/features/map/domain/entities/abstract_map_controller.dart';
+import 'package:pneu/features/map/domain/entities/event.dart';
 import 'package:pneu/features/map/domain/entities/route_segment.dart';
+import 'package:pneu/features/map/presentation/stores/events_store.dart';
 import 'package:pneu/features/map/presentation/stores/location_popup_store.dart';
 import 'package:pneu/features/map/presentation/stores/position_store.dart';
 import 'package:pneu/features/map/presentation/stores/route_store.dart';
@@ -40,6 +43,13 @@ class MapStore extends ChangeNotifier {
 
   bool isCentering = false;
   bool isNavigatingRoute = false;
+  double _zoom = 16;
+
+  double get zoom => _zoom;
+  set zoom(double zoom) {
+    _zoom = zoom;
+    notifyListeners();
+  }
 
 //   void updateCurrentPosition(CustomLatLng currentPosition) {
 //     _currentPosition = currentPosition;
@@ -265,5 +275,16 @@ class MapStore extends ChangeNotifier {
     print('DISTANCE FROM NEXT LINE: ${minDist}');
 
     return minDist;
+  }
+
+  Future<List<CustomLatLng>> getBounds(MapCameraOptions cameraOptions) async {
+    final bounds =
+        await mapController?.getCoordinateBoundsForCamera(cameraOptions);
+    return bounds ?? List.empty();
+  }
+
+  Future<void> drawEvents(List<Event> events, double zoom) async {
+    await mapController?.showEventsOnMap(events, zoom);
+    notifyListeners();
   }
 }
