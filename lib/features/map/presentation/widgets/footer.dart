@@ -4,9 +4,10 @@ import 'package:pneu/shared/widgets/custom_search_bar.dart';
 import 'package:pneu/core/themes/app_colors.dart';
 
 class Footer extends StatelessWidget {
-  const Footer({super.key, required this.panelPosition});
+  Footer({super.key, required this.panelPosition});
 
   final double panelPosition;
+  late final FocusNode _searchFocusNode = FocusNode();
 
   @override
   Widget build(BuildContext context) {
@@ -15,8 +16,9 @@ class Footer extends StatelessWidget {
         Container(
           width: MediaQuery.of(context).size.width,
           height: BarDimensions.pullIconContainerHeight,
-          color:
-              panelPosition > 1 / BarDimensions.pullIconContainerHeight ? AppColors.primaryColor : Colors.transparent,
+          color: panelPosition > 1 / BarDimensions.pullIconContainerHeight
+              ? AppColors.primaryColor
+              : Colors.transparent,
         ),
         Container(
           width: MediaQuery.of(context).size.width,
@@ -30,7 +32,7 @@ class Footer extends StatelessWidget {
             ),
             color: AppColors.primaryColor,
           ),
-          child: const CustomSearchBar(),
+          child: CustomSearchBar(),
         ),
       ],
     );

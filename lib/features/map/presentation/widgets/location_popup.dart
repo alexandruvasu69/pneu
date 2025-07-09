@@ -1,16 +1,10 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:pneu/features/map/data/models/geocoding_response.dart';
 import 'package:pneu/features/map/presentation/stores/location_popup_store.dart';
-import 'package:pneu/features/map/presentation/stores/map_store.dart';
 import 'package:pneu/features/map/presentation/widgets/skeleton_box.dart';
 import 'package:pneu/shared/models/custom_lat_lng.dart';
 import 'package:pneu/shared/models/custom_screen_position.dart';
 import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
 
 class LocationPopup extends HookWidget {
   const LocationPopup({

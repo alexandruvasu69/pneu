@@ -70,13 +70,15 @@ class MapStore extends ChangeNotifier {
   }
 
   void centerMapOnLocationPopup(
-      CustomLatLng realCoords, CustomScreenPosition screenPosition) async {
+      {required CustomLatLng realCoords,
+      CustomScreenPosition? screenPosition}) async {
     await mapController?.animateCamera(realCoords, 16);
 
     _locationPopupStore.isLocationPopupLoading = true;
     _locationPopupStore.isLocationPopupActive = false;
     _locationPopupStore.locationPopupRealCoordinate = realCoords;
-    _locationPopupStore.locationPopupScreenCoordinate = screenPosition;
+    if (screenPosition != null)
+      _locationPopupStore.locationPopupScreenCoordinate = screenPosition;
     _locationPopupStore.isLocationPopupActive = true;
 
     notifyListeners();

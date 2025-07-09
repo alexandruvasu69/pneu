@@ -9,7 +9,7 @@ class RoutesSupabaseDatasource {
   Future<Either<AppException, List<dynamic>>> getRoutes(
       double startLat, double startLng, double endLat, double endLng) async {
     final Uri url = Uri.parse(
-        '${dotenv.env['SUPABASE_URL']}/rest/v1/rpc/calculate_shortest_route');
+        '${dotenv.env['SUPABASE_URL']}/rest/v1/rpc/calculate_shortest_route_1');
 
     try {
       final http.Response response = await http.post(

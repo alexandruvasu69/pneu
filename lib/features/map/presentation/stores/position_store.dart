@@ -24,7 +24,7 @@ class PositionStore extends ChangeNotifier {
 
   double? get bearing {
     if (_bearing == null) return null;
-    return (_bearing! + _offset) % 360;
+    return ((_bearing! + _offset) % 360).toDouble();
   }
 
   set bearing(double? bearing) {

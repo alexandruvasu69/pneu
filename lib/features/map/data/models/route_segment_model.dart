@@ -6,19 +6,20 @@ class RouteSegmentModel extends RouteSegment {
   RouteSegmentModel(
       {required super.seq,
       required super.coordinates,
-      required super.safetyCategory,
-      required super.mode,
+      super.safetyCategory,
+      super.mode,
       required super.events,
       super.highway});
 
   factory RouteSegmentModel.fromJson(Map<String, dynamic> json) {
+    print("SEGMENT PROBLEM: ${json}");
     return RouteSegmentModel(
       seq: json['seq'] as int,
       coordinates: (json['geom']['coordinates'] as List<dynamic>)
           .map((c) => CustomLatLng(c[1], c[0]))
           .toList(),
-      safetyCategory: json['lts'] as int,
-      mode: json['mode'] as String,
+      safetyCategory: json['lts'] as int?,
+      mode: json['mode'] as String?,
       events: (json['events'] as List<dynamic>)
           .map((e) => EventModel.fromJson(e as Map<String, dynamic>))
           .toList(),

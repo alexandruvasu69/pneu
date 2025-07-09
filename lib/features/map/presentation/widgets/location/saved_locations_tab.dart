@@ -40,8 +40,8 @@ class SavedLocationsTab extends StatelessWidget {
             await context.read<RouteStore>().fetchRoutes(
                 positionStore.currentPosition!.latitude,
                 positionStore.currentPosition!.longitude,
-                loc.latitude,
-                loc.longitude);
+                loc.latitude!,
+                loc.longitude!);
 
             await context
                 .read<MapStore>()

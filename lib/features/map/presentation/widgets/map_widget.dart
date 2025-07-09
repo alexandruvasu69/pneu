@@ -104,8 +104,9 @@ class _MapWidgetState extends State<MapWidget> {
             onCameraChangeListener: handleCameraChange,
             onLongTapListener: (mb.MapContentGestureContext mapContext) {
               context.read<MapStore>().centerMapOnLocationPopup(
-                  mapContext.point.coordinates.toCustomLatLng(),
-                  mapContext.touchPosition.toCustomScreenPosition());
+                  realCoords: mapContext.point.coordinates.toCustomLatLng(),
+                  screenPosition:
+                      mapContext.touchPosition.toCustomScreenPosition());
             },
             onTapListener: (mb.MapContentGestureContext mapContext) {
               context.read<LocationPopupStore>().isLocationPopupActive = false;

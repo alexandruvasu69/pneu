@@ -28,7 +28,8 @@ class SavedLocationRepositoryImpl implements SavedLocationRepository {
           .toList();
       return Either.right(savedLocations);
     } catch (e) {
-      return Either.left(ParsingException(e.toString()));
+      return Either.left(
+          ParsingException(e.toString() + " SAVED LOCATIONS REPOSITORY 1"));
     }
   }
 
@@ -43,7 +44,8 @@ class SavedLocationRepositoryImpl implements SavedLocationRepository {
     try {
       return Either.right(either.right);
     } catch (e) {
-      return Either.left(ParsingException(e.toString()));
+      return Either.left(
+          ParsingException(e.toString() + " SAVED LOCATIONS REPOSITORY 2"));
     }
   }
 

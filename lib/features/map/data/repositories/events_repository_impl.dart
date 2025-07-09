@@ -25,7 +25,7 @@ class EventsRepositoryImpl implements EventsRepository {
           either.right.map((e) => EventModel.fromJson(e)).toList();
       return Either.right(events);
     } catch (e) {
-      return Either.left(ParsingException(e.toString()));
+      return Either.left(ParsingException(e.toString() + " EVENTS REPOSITORY"));
     }
   }
 
@@ -43,7 +43,7 @@ class EventsRepositoryImpl implements EventsRepository {
       final event = EventModel.fromJson(either.right);
       return Either.right(event);
     } catch (e) {
-      return Either.left(ParsingException(e.toString()));
+      return Either.left(ParsingException(e.toString() + " EVENTS REPOSITORY"));
     }
   }
 }

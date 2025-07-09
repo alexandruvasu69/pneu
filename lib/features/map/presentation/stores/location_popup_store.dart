@@ -23,6 +23,11 @@ class LocationPopupStore extends ChangeNotifier {
   CustomLatLng? get locationPopupRealCoordinate => _locationPopupRealCoordinate;
   bool get isLocationPopupActive => _isLocationPopupActive;
 
+  set selectedLocation(Location? location) {
+    _selectedLocation = location;
+    notifyListeners();
+  }
+
   set locationPopupScreenCoordinate(CustomScreenPosition? screenPos) {
     _locationPopupScreenCoordinate = screenPos;
     notifyListeners();

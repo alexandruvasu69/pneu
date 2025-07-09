@@ -5,8 +5,8 @@ class LocationModel extends Location {
     required super.id,
     required super.address1,
     required super.address2,
-    required super.latitude,
-    required super.longitude,
+    super.latitude,
+    super.longitude,
   });
 
   factory LocationModel.fromJson(Map<String, dynamic> json) {
@@ -55,8 +55,8 @@ class LocationModel extends Location {
     final address2 = props['place_formatted'] as String? ?? 'unknown place';
 
     final coords = geom['coordinates'] as List;
-    final longitude = coords[0] as double;
-    final latitude = coords[1] as double;
+    final longitude = coords[0];
+    final latitude = coords[1];
 
     return LocationModel(
       id: id,

@@ -21,6 +21,7 @@ import 'package:pneu/features/map/data/repositories/events_repository_impl.dart'
 import 'package:pneu/features/map/data/repositories/location_repository_impl.dart';
 import 'package:pneu/features/map/data/repositories/route_repository_impl.dart';
 import 'package:pneu/features/map/data/repositories/saved_location_repository_impl.dart';
+import 'package:pneu/features/map/domain/entities/location.dart';
 import 'package:pneu/features/map/domain/repositories/events_repository.dart';
 import 'package:pneu/features/map/domain/repositories/location_repository.dart';
 import 'package:pneu/features/map/domain/repositories/route_repository.dart';
@@ -31,7 +32,9 @@ import 'package:pneu/features/map/domain/usecases/get_calculated_routes.dart';
 import 'package:pneu/features/map/domain/usecases/get_events_for_bounds.dart';
 import 'package:pneu/features/map/domain/usecases/get_location.dart';
 import 'package:pneu/features/map/domain/usecases/get_saved_locations.dart';
+import 'package:pneu/features/map/domain/usecases/retrieve_location.dart';
 import 'package:pneu/features/map/domain/usecases/save_location.dart';
+import 'package:pneu/features/map/domain/usecases/suggest_location.dart';
 import 'package:pneu/features/map/presentation/map_screen.dart';
 import 'package:pneu/core/themes/app_theme.dart';
 import 'package:pneu/features/map/presentation/stores/events_store.dart';
@@ -42,6 +45,8 @@ import 'package:pneu/features/map/presentation/stores/panel_store.dart';
 import 'package:pneu/features/map/presentation/stores/position_store.dart';
 import 'package:pneu/features/map/presentation/stores/route_store.dart';
 import 'package:pneu/features/map/presentation/stores/saved_locations_store.dart';
+import 'package:pneu/features/map/presentation/stores/search_store.dart';
+import 'package:pneu/features/search/search_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
@@ -81,6 +86,8 @@ void main() async {
 
   final eventsStore = initEventsStore();
 
+  final searchStore = initSearchStore();
+
   runApp(MultiProvider(
     providers: <SingleChildWidget>[
       ChangeNotifierProvider<ModalStore>.value(value: modalStore),
@@ -94,6 +101,7 @@ void main() async {
       ChangeNotifierProvider<SavedLocationsStore>.value(
           value: savedLocationsStore),
       ChangeNotifierProvider<EventsStore>.value(value: eventsStore),
+      ChangeNotifierProvider<SearchStore>.value(value: searchStore),
     ],
     child: MaterialApp(
       theme: AppTheme.lightTheme,
@@ -101,6 +109,7 @@ void main() async {
       routes: {
         SignupScreen.routeName: (_) => const SignupScreen(),
         LoginScreen.routeName: (_) => const LoginScreen(),
+        SearchScreen.routeName: (_) => const SearchScreen(),
       },
     ),
   ));
@@ -150,4 +159,14 @@ UserNotifier initUserNotifier(SavedLocationsStore savedLocationsStore) {
       login: login,
       register: register,
       savedLocationsStore: savedLocationsStore);
+}
+
+SearchStore initSearchStore() {
+  LocationMapboxGeocodingDataSource source =
+      LocationMapboxGeocodingDataSource();
+  LocationRepository repository = LocationRepositoryImpl(source);
+  SuggestLocation suggestLocation = SuggestLocation(repository);
+  RetrieveLocation retrieveLocation = RetrieveLocation(repository);
+  return SearchStore(
+      suggestLocation: suggestLocation, retrieveLocation: retrieveLocation);
 }

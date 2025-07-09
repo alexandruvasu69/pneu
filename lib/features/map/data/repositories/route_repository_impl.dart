@@ -23,7 +23,7 @@ class RouteRepositoryImpl implements RouteRepository {
           either.right.map((json) => RouteModel.fromJson(json)).toList();
       return Either.right(model);
     } catch (e) {
-      return Either.left(ParsingException(e.toString()));
+      return Either.left(ParsingException(e.toString() + " ROUTE REPOSITORY"));
     }
   }
 }

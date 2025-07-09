@@ -52,15 +52,11 @@ class SavedLocationsSupabaseDatasource {
 
   Future<Either<AppException, List<dynamic>>> getSavedLocations(
       User user) async {
-    print("TEST");
-
     final uri =
         Uri.parse('${dotenv.env['SUPABASE_URL']!}/rest/v1/saved_locations'
             '?select=*,coords&user_id=eq.${user.id}');
 
     try {
-      print("SAVED LOCATIONS:");
-
       final http.Response response = await http.get(
         uri,
         // ignore: always_specify_types
@@ -71,7 +67,7 @@ class SavedLocationsSupabaseDatasource {
         },
       );
 
-      print("SAVED LOCATIONS:");
+      print("SAVED LOCATIONS: ${response.body}");
 
       if (response.statusCode == 200) {
         final List<dynamic> body = jsonDecode(response.body);
