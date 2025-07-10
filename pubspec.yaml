@@ -93,7 +93,9 @@ flutter:
     - assets/icons/Share.svg
     - assets/icons/Cancel.svg
     - assets/icons/SaveFavorite.svg
-    - assets/icons/attention-triangle.png
+    - assets/icons/AttentionTriangle.png
+    - assets/icons/HighSpeed.png
+    - assets/icons/ParkedVehicle.png
     - .env
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

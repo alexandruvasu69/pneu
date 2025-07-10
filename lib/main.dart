@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:pneu/features/login/data/datasources/user_shared_pref_data_source.dart';
 import 'package:pneu/features/login/data/datasources/user_supabase_data_source.dart';
@@ -9,6 +8,7 @@ import 'package:pneu/features/login/domain/repositiories/user_repository.dart';
 import 'package:pneu/features/login/domain/usecases/get_user.dart';
 import 'package:pneu/features/login/domain/usecases/login.dart';
 import 'package:pneu/features/login/domain/usecases/register.dart';
+import 'package:pneu/features/login/presentation/account_screen.dart';
 import 'package:pneu/features/login/presentation/login_screen.dart';
 import 'package:pneu/features/login/presentation/notifiers/user_notifier.dart';
 import 'package:pneu/features/login/presentation/signup_screen.dart';
@@ -21,7 +21,6 @@ import 'package:pneu/features/map/data/repositories/events_repository_impl.dart'
 import 'package:pneu/features/map/data/repositories/location_repository_impl.dart';
 import 'package:pneu/features/map/data/repositories/route_repository_impl.dart';
 import 'package:pneu/features/map/data/repositories/saved_location_repository_impl.dart';
-import 'package:pneu/features/map/domain/entities/location.dart';
 import 'package:pneu/features/map/domain/repositories/events_repository.dart';
 import 'package:pneu/features/map/domain/repositories/location_repository.dart';
 import 'package:pneu/features/map/domain/repositories/route_repository.dart';
@@ -57,35 +56,17 @@ void main() async {
   _setup();
 
   final modalStore = ModalStore();
-
   final SavedLocationsStore savedLocationsStore =
       initSavedLocationsStore(modalStore);
-
-  final userNotifier = initUserNotifier(savedLocationsStore);
-  await userNotifier.loadInitialUser();
-
-  LocationMapboxGeocodingDataSource locationSource =
-      LocationMapboxGeocodingDataSource();
-  LocationRepository locationRepository =
-      LocationRepositoryImpl(locationSource);
-  GetLocation getLocation = GetLocation(locationRepository);
-
-  RouteRepository routeRepository =
-      RouteRepositoryImpl(RoutesSupabaseDatasource());
-  GetCalculatedRoutes getRoutes = GetCalculatedRoutes(routeRepository);
-
-  final routeStore = RouteStore(getRoutes: getRoutes, modalStore: modalStore);
-  final locationPopupStore = LocationPopupStore(getLocation: getLocation);
+  final userNotifier = await initUserNotifier(savedLocationsStore);
+  final routeStore = initRouteStore(modalStore);
+  final locationPopupStore = initLocationPopupStore();
   final positionStore = PositionStore();
-  final mapStore = MapStore(
-      locationPopupStore: locationPopupStore,
-      routeStore: routeStore,
-      positionStore: positionStore);
-  final panelStore = PanelStore();
-  panelStore.initController(SlidingPanelController(PanelController()));
+  final panelStore = initPanelStore();
+  final mapStore =
+      initMapStore(locationPopupStore, routeStore, positionStore, panelStore);
 
   final eventsStore = initEventsStore();
-
   final searchStore = initSearchStore();
 
   runApp(MultiProvider(
@@ -110,6 +91,7 @@ void main() async {
         SignupScreen.routeName: (_) => const SignupScreen(),
         LoginScreen.routeName: (_) => const LoginScreen(),
         SearchScreen.routeName: (_) => const SearchScreen(),
+        AccountScreen.routeName: (_) => const AccountScreen(),
       },
     ),
   ));
@@ -146,7 +128,8 @@ SavedLocationsStore initSavedLocationsStore(ModalStore modalStore) {
   );
 }
 
-UserNotifier initUserNotifier(SavedLocationsStore savedLocationsStore) {
+Future<UserNotifier> initUserNotifier(
+    SavedLocationsStore savedLocationsStore) async {
   UserSupabaseDataSource remoteSource = UserSupabaseDataSource();
   UserSharedPrefDataSource localSource = UserSharedPrefDataSource();
   UserRepository repository = UserRepositoryImpl(remoteSource, localSource);
@@ -154,11 +137,14 @@ UserNotifier initUserNotifier(SavedLocationsStore savedLocationsStore) {
   Login login = Login(repository);
   Register register = Register(repository);
 
-  return UserNotifier(
+  UserNotifier userNotifier = UserNotifier(
       getUser: getUser,
       login: login,
       register: register,
       savedLocationsStore: savedLocationsStore);
+
+  await userNotifier.loadInitialUser();
+  return userNotifier;
 }
 
 SearchStore initSearchStore() {
@@ -169,4 +155,39 @@ SearchStore initSearchStore() {
   RetrieveLocation retrieveLocation = RetrieveLocation(repository);
   return SearchStore(
       suggestLocation: suggestLocation, retrieveLocation: retrieveLocation);
+}
+
+LocationPopupStore initLocationPopupStore() {
+  LocationMapboxGeocodingDataSource locationSource =
+      LocationMapboxGeocodingDataSource();
+  LocationRepository locationRepository =
+      LocationRepositoryImpl(locationSource);
+  GetLocation getLocation = GetLocation(locationRepository);
+
+  return LocationPopupStore(getLocation: getLocation);
+}
+
+RouteStore initRouteStore(ModalStore modalStore) {
+  RouteRepository routeRepository =
+      RouteRepositoryImpl(RoutesSupabaseDatasource());
+  GetCalculatedRoutes getRoutes = GetCalculatedRoutes(routeRepository);
+
+  return RouteStore(getRoutes: getRoutes, modalStore: modalStore);
+}
+
+MapStore initMapStore(LocationPopupStore locationPopupStore,
+    RouteStore routeStore, PositionStore positionStore, PanelStore panelStore) {
+  return MapStore(
+    locationPopupStore: locationPopupStore,
+    routeStore: routeStore,
+    positionStore: positionStore,
+    panelStore: panelStore,
+  );
+}
+
+PanelStore initPanelStore() {
+  PanelStore panelStore = PanelStore();
+  panelStore.initController(SlidingPanelController(PanelController()));
+
+  return panelStore;
 }

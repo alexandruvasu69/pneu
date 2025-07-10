@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart' as geo;
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:pneu/core/constants/app/footer_constants.dart';
-import 'package:pneu/core/themes/app_colors.dart';
 import 'package:pneu/core/utils/conversions.dart';
 import 'package:pneu/features/map/domain/entities/abstract_map_controller.dart';
 import 'package:pneu/features/map/domain/entities/event.dart';
@@ -434,7 +433,7 @@ class MapboxController implements AbstractMapController {
       return CircleAnnotationOptions(
         geometry: Point(coordinates: e.geometry.toMapboxPosition()),
         circleRadius: zoom > 14 ? 16.0 : 5.0,
-        circleColor: 0xFFCA3535,
+        circleColor: 0xFFFFFFFF,
         circleOpacity: 0.9,
         circleStrokeWidth: 2.0,
         circleStrokeColor: 0xFF8A59DE,
@@ -442,13 +441,27 @@ class MapboxController implements AbstractMapController {
     }).toList();
     await _circleManager.createMulti(circleOptions);
 
-    final bytes = await rootBundle.load('assets/icons/attention-triangle.png');
-    final Uint8List iconData = bytes.buffer.asUint8List();
+    final Map<int, Uint8List> iconCache = {
+      1: (await rootBundle.load('assets/icons/AttentionTriangle.png'))
+          .buffer
+          .asUint8List(),
+      2: (await rootBundle.load('assets/icons/HighSpeed.png'))
+          .buffer
+          .asUint8List(),
+      3: (await rootBundle.load('assets/icons/ParkedVehicle.png'))
+          .buffer
+          .asUint8List(),
+      -1: (await rootBundle.load('assets/icons/AttentionTriangle.png'))
+          .buffer
+          .asUint8List(),
+    };
 
     final annotations = events.map((e) {
+      final iconKey = e.subtypeId ?? -1;
+      final imageData = iconCache[iconKey] ?? iconCache['default'];
       return PointAnnotationOptions(
         geometry: Point(coordinates: e.geometry.toMapboxPosition()),
-        image: iconData,
+        image: imageData,
         iconSize: 1.0,
       );
     }).toList();

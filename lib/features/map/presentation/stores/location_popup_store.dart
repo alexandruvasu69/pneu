@@ -25,6 +25,7 @@ class LocationPopupStore extends ChangeNotifier {
 
   set selectedLocation(Location? location) {
     _selectedLocation = location;
+
     notifyListeners();
   }
 

@@ -42,20 +42,13 @@ class SearchScreen extends StatelessWidget {
                 return LocationCard(
                   location: location,
                   onTap: () async {
+                    Navigator.of(context).pop();
                     final retrievedLocation = await searchStore
                         .retrieveLocation(location.id, userStore.user!);
-                    locationPopupStore.selectedLocation = retrievedLocation;
-                    final selectedLocation =
-                        locationPopupStore.selectedLocation;
-                    locationPopupStore.locationPopupRealCoordinate =
-                        CustomLatLng(selectedLocation!.latitude!,
-                            selectedLocation.longitude!);
-                    mapStore.updatePopUpScreenLocation();
-                    mapStore.centerMapOnLocationPopup(
-                        realCoords: CustomLatLng(selectedLocation!.latitude!,
-                            selectedLocation!.longitude!));
-
-                    Navigator.of(context).pop();
+                    print(
+                        "RETRIEVED LOCATION : ${retrievedLocation.address1}, ${retrievedLocation.address2}, ${retrievedLocation.latitude}, ${retrievedLocation.longitude}");
+                    mapStore.centerMapOnLocationPopupWithLocation(
+                        retrievedLocation);
                   },
                 );
               },

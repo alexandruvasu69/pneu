@@ -16,8 +16,18 @@ class EventsStore extends ChangeNotifier {
 
   Future<void> getEventsForBounds(
       double sw_lat, double sw_lng, double ne_lat, double ne_lng) async {
-    final events = await _getEventsForBounds(sw_lat, sw_lng, ne_lat, ne_lng);
-    shownEvents.addAll(events);
+    final fresh = await _getEventsForBounds(sw_lat, sw_lng, ne_lat, ne_lng);
+
+    final freshIds = fresh.map((e) => e.id).toSet();
+
+    shownEvents.removeWhere((e) => !freshIds.contains(e.id));
+
+    for (final e in fresh) {
+      if (!shownEvents.any((old) => old.id == e.id)) {
+        shownEvents.add(e);
+      }
+    }
+
     notifyListeners();
   }
 

@@ -58,7 +58,7 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    MapStore mapStore = context.read<MapStore>();
+    MapStore mapStore = context.watch<MapStore>();
     PanelStore panelStore = context.watch<PanelStore>();
     double bottomPosition = BarDimensions.closedPanelHeight +
         44 +
@@ -157,7 +157,7 @@ class _MapScreenState extends State<MapScreen> {
                 right: 30,
                 child: const ActionButtonsPanel(),
               ),
-              context.read<MapStore>().isAutoCentering
+              mapStore.isAutoCentering && mapStore.isNavigatingRoute
                   ? Positioned(
                       top: 50,
                       left: 30,

@@ -49,7 +49,7 @@ class _MapWidgetState extends State<MapWidget> {
       }
 
       _debounce?.cancel();
-      _debounce = Timer(const Duration(milliseconds: 400), () async {
+      _debounce = Timer(const Duration(milliseconds: 50), () async {
         final cs = cameraChangedEventData.cameraState;
 
         final co = MapCameraOptions(
@@ -103,10 +103,10 @@ class _MapWidgetState extends State<MapWidget> {
             },
             onCameraChangeListener: handleCameraChange,
             onLongTapListener: (mb.MapContentGestureContext mapContext) {
-              context.read<MapStore>().centerMapOnLocationPopup(
-                  realCoords: mapContext.point.coordinates.toCustomLatLng(),
-                  screenPosition:
-                      mapContext.touchPosition.toCustomScreenPosition());
+              context.read<MapStore>().centerMapOnLocationPopupWithCoords(
+                    mapContext.point.coordinates.toCustomLatLng(),
+                    mapContext.touchPosition.toCustomScreenPosition(),
+                  );
             },
             onTapListener: (mb.MapContentGestureContext mapContext) {
               context.read<LocationPopupStore>().isLocationPopupActive = false;
@@ -131,14 +131,9 @@ class _MapWidgetState extends State<MapWidget> {
                   selectedLocation!.latitude,
                   selectedLocation.longitude);
 
-              print(
-                  'ROUTE OPTIONS: ${context.read<RouteStore>().routeOptions![0].routeSegments.length}');
-
               await context
                   .read<MapStore>()
                   .drawRoutes(context.read<RouteStore>().routeOptions!);
-
-              panelStore.snapPanel(PanelContentType.routeDetails);
             },
           ),
           if (context.watch<RouteStore>().isLoading)

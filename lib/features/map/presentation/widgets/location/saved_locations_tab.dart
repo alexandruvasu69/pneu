@@ -3,6 +3,7 @@ import 'package:flutter/rendering.dart';
 import 'package:pneu/core/constants/app/footer_constants.dart';
 import 'package:pneu/features/login/presentation/notifiers/user_notifier.dart';
 import 'package:pneu/features/map/enums/panel_content_type.dart';
+import 'package:pneu/features/map/presentation/stores/location_popup_store.dart';
 import 'package:pneu/features/map/presentation/stores/map_store.dart';
 import 'package:pneu/features/map/presentation/stores/panel_store.dart';
 import 'package:pneu/features/map/presentation/stores/position_store.dart';
@@ -37,6 +38,8 @@ class SavedLocationsTab extends StatelessWidget {
         return LocationCard(
           location: loc,
           onTap: () async {
+            context.read<LocationPopupStore>().selectedLocation = loc;
+
             await context.read<RouteStore>().fetchRoutes(
                 positionStore.currentPosition!.latitude,
                 positionStore.currentPosition!.longitude,
@@ -46,8 +49,6 @@ class SavedLocationsTab extends StatelessWidget {
             await context
                 .read<MapStore>()
                 .drawRoutes(context.read<RouteStore>().routeOptions!);
-
-            await panelStore.snapPanel(PanelContentType.routeDetails);
           },
         );
       },

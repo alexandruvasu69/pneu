@@ -1,18 +1,13 @@
-import 'dart:convert';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:geodesy/geodesy.dart' as geodesy;
-import 'package:geolocator/geolocator.dart';
-import 'package:http/http.dart' as http;
-import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
-import 'package:pneu/core/utils/conversions.dart';
 import 'package:pneu/features/map/data/models/mapbox_controller.dart';
 import 'package:pneu/features/map/domain/entities/abstract_map_controller.dart';
 import 'package:pneu/features/map/domain/entities/event.dart';
+import 'package:pneu/features/map/domain/entities/location.dart';
 import 'package:pneu/features/map/domain/entities/route_segment.dart';
-import 'package:pneu/features/map/presentation/stores/events_store.dart';
+import 'package:pneu/features/map/enums/panel_content_type.dart';
 import 'package:pneu/features/map/presentation/stores/location_popup_store.dart';
+import 'package:pneu/features/map/presentation/stores/panel_store.dart';
 import 'package:pneu/features/map/presentation/stores/position_store.dart';
 import 'package:pneu/features/map/presentation/stores/route_store.dart';
 import 'package:pneu/shared/models/custom_lat_lng.dart';
@@ -20,17 +15,20 @@ import 'package:pneu/shared/models/custom_screen_position.dart';
 import 'package:pneu/features/map/domain/entities/route.dart' as r;
 
 class MapStore extends ChangeNotifier {
-  MapStore(
-      {required LocationPopupStore locationPopupStore,
-      required RouteStore routeStore,
-      required PositionStore positionStore})
-      : _locationPopupStore = locationPopupStore,
+  MapStore({
+    required LocationPopupStore locationPopupStore,
+    required RouteStore routeStore,
+    required PositionStore positionStore,
+    required PanelStore panelStore,
+  })  : _locationPopupStore = locationPopupStore,
         _routeStore = routeStore,
-        _positionStore = positionStore;
+        _positionStore = positionStore,
+        _panelStore = panelStore;
 
   LocationPopupStore _locationPopupStore;
   RouteStore _routeStore;
   PositionStore _positionStore;
+  PanelStore _panelStore;
 
   AbstractMapController? mapController;
 
@@ -69,22 +67,33 @@ class MapStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  void centerMapOnLocationPopup(
-      {required CustomLatLng realCoords,
-      CustomScreenPosition? screenPosition}) async {
+  void centerMapOnLocationPopupWithCoords(
+      CustomLatLng realCoords, CustomScreenPosition screenPosition) async {
     await mapController?.animateCamera(realCoords, 16);
 
     _locationPopupStore.isLocationPopupLoading = true;
     _locationPopupStore.isLocationPopupActive = false;
     _locationPopupStore.locationPopupRealCoordinate = realCoords;
-    if (screenPosition != null)
-      _locationPopupStore.locationPopupScreenCoordinate = screenPosition;
+    _locationPopupStore.locationPopupScreenCoordinate = screenPosition;
     _locationPopupStore.isLocationPopupActive = true;
 
     notifyListeners();
   }
 
-  void updatePopUpScreenLocation() async {
+  void centerMapOnLocationPopupWithLocation(Location location) async {
+    CustomLatLng coords = CustomLatLng(location.latitude!, location.longitude!);
+    await mapController?.animateCamera(coords, 16);
+
+    _locationPopupStore.isLocationPopupLoading = true;
+    _locationPopupStore.isLocationPopupActive = false;
+    _locationPopupStore.locationPopupRealCoordinate = coords;
+    await updatePopUpScreenLocation();
+    _locationPopupStore.isLocationPopupActive = true;
+
+    notifyListeners();
+  }
+
+  Future<void> updatePopUpScreenLocation() async {
     try {
       CustomLatLng realCoord = _locationPopupStore.locationPopupRealCoordinate!;
 
@@ -109,6 +118,7 @@ class MapStore extends ChangeNotifier {
     await mapController?.animateCameraToBound(coords);
     // await mapController?.drawRoute(coords);
     _locationPopupStore.isLocationPopupActive = false;
+    _panelStore.snapPanel(PanelContentType.routeDetails);
 
     notifyListeners();
   }
