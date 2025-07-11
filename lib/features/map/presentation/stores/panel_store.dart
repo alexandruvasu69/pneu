@@ -6,6 +6,7 @@ class PanelStore extends ChangeNotifier {
   AbstractPanelController? panelController;
   bool _isPanelLocked = false;
   double _position = 0;
+  bool _isPanelOpening = false;
 
   PanelContentType _panelContentType = PanelContentType.locations;
 
@@ -16,6 +17,12 @@ class PanelStore extends ChangeNotifier {
   }
 
   bool get isPanelClosed => _position == 0;
+
+  bool get isPanelOpening => _isPanelOpening;
+  set isPanelOpening(bool isOpening) {
+    _isPanelOpening = isOpening;
+    notifyListeners();
+  }
 
   bool get isPanelLocked => _isPanelLocked;
   PanelContentType get panelContentType => _panelContentType;
@@ -31,10 +38,13 @@ class PanelStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> closePanel() async {
+  Future<void> closePanel({bool onPanelClosed = false}) async {
     _isPanelLocked = false;
     notifyListeners();
-    await panelController?.closePanel();
+
+    if (!onPanelClosed) {
+      await panelController?.closePanel();
+    }
     _panelContentType = PanelContentType.locations;
 
     notifyListeners();

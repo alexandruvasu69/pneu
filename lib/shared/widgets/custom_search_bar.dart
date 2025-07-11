@@ -43,7 +43,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
         asset: 'assets/icons/Account.svg',
         onPressed: () {
           _searchFocusNode.unfocus();
-          Navigator.of(context).pushNamed('/login');
+          Navigator.of(context).pushNamed('/account');
         },
       ),
       trailing: <Widget>[
@@ -54,7 +54,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
           },
         ),
       ],
-      hintText: context.watch<UserNotifier>().user?.id ?? 'Caută',
+      hintText: 'Where to?',
       overlayColor: const WidgetStatePropertyAll<Color?>(Colors.transparent),
       onTap: () {
         if (widget.isInMainScreen) {

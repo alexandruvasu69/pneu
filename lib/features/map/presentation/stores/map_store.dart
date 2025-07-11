@@ -60,8 +60,9 @@ class MapStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  void centerMapOnCurrentLocation(CustomLatLng currentPosition) {
-    mapController?.animateCamera(currentPosition, 16);
+  void centerMapOnCurrentLocation(CustomLatLng currentPosition,
+      {double zoom = 16}) {
+    mapController?.animateCamera(currentPosition, zoom);
     isCentering = true;
 
     notifyListeners();

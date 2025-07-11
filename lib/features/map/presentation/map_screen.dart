@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:pneu/core/constants/app/footer_constants.dart';
 import 'package:pneu/core/themes/app_colors.dart';
@@ -11,6 +13,7 @@ import 'package:pneu/features/map/presentation/stores/position_store.dart';
 import 'package:pneu/features/map/presentation/stores/saved_locations_store.dart';
 import 'package:pneu/features/map/presentation/widgets/buttons/action_buttons_panel.dart';
 import 'package:pneu/features/map/presentation/widgets/buttons/center_button.dart';
+import 'package:pneu/features/map/presentation/widgets/events/events_tab.dart';
 import 'package:pneu/features/map/presentation/widgets/footer.dart';
 import 'package:pneu/features/map/presentation/widgets/general_modal.dart';
 import 'package:pneu/features/map/presentation/widgets/location/route_details.dart';
@@ -32,6 +35,8 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   final PanelController _panelController = PanelController();
+  Timer? _debounce;
+  bool _isClosedHandled = true;
 
   @override
   void initState() {
@@ -82,14 +87,37 @@ class _MapScreenState extends State<MapScreen> {
                 borderRadius: BorderRadius.circular(10),
                 isDraggable: !panelStore.isPanelLocked,
                 onPanelSlide: (double position) {
+                  if (!panelStore.isPanelClosed && position > 0) {
+                    _isClosedHandled = false;
+                    _debounce?.cancel();
+                  }
+                  print(
+                      "IS ANIMATING: ${panelStore.panelController?.isPanelAnimating}");
+                  print("POSITION: ${position}");
+                  if (position > panelStore.position) {
+                    panelStore.isPanelOpening = true;
+                  } else {
+                    panelStore.isPanelOpening = false;
+                  }
                   panelStore.position = position;
                 },
                 onPanelClosed: () async {
-                  if (panelStore.panelContentType ==
-                          PanelContentType.locations ||
-                      panelStore.panelContentType == PanelContentType.events) {
-                    await panelStore.closePanel();
-                  }
+                  print("ON PANEL CLOSED");
+                  _debounce?.cancel();
+                  _debounce = Timer(Duration(milliseconds: 100), () async {
+                    if (panelStore.position == 0) {
+                      await panelStore.closePanel(onPanelClosed: true);
+                    }
+                  });
+
+                  //   if ((panelStore.panelContentType ==
+                  //               PanelContentType.locations ||
+                  //           panelStore.panelContentType ==
+                  //               PanelContentType.events) &&
+                  //       !panelStore.isPanelOpening) {
+                  //     await panelStore.closePanel();
+                  //     panelStore.isPanelOpening = true;
+                  //   }
                 },
                 // TO-DO: Add container for location widgets
                 panelBuilder: (sc) {
@@ -117,7 +145,9 @@ class _MapScreenState extends State<MapScreen> {
 
                               switch (panelStore.panelContentType) {
                                 case PanelContentType.events:
-                                  return const Text('Evenimente în zona');
+                                  return EventsTab(
+                                    scrollController: sc,
+                                  );
                                 case PanelContentType.locations:
                                   return SavedLocationsTab(
                                     scrollController: sc,

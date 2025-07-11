@@ -34,4 +34,8 @@ class SlidingPanelController implements AbstractPanelController {
 
   @override
   double get panelPosition => panelController.panelPosition;
+
+  @override
+  // TODO: implement isPanelAnimating
+  get isPanelAnimating => panelController.isPanelAnimating;
 }

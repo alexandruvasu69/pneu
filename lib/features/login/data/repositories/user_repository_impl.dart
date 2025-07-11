@@ -22,10 +22,13 @@ class UserRepositoryImpl implements UserRepository {
         return GuestModel.fromJson(data);
       }
     } else {
+      print("ELSE");
       data = await remoteSource.getOrCreateGuestUser();
     }
 
     await localSource.saveUser(data);
+
+    print("USER DATA: ${data}");
 
     return GuestModel.fromJson(data);
   }
@@ -40,9 +43,26 @@ class UserRepositoryImpl implements UserRepository {
 
   @override
   Future<User> register(String email, String password) async {
-    final Map<String, dynamic> data = await remoteSource.register(email, password);
+    final Map<String, dynamic> data =
+        await remoteSource.register(email, password);
     await localSource.saveUser(data);
 
     return AuthModel.fromJson(data);
+  }
+
+  @override
+  Future<User> updateUserRole(User user) async {
+    final Map<String, dynamic> data = await remoteSource.getRole(user);
+    user.role = data['role'];
+    print("USER: ${user.id}, ${user.isGuest}, ${user.token}");
+    // await localSource.saveUser(user.toJson());
+
+    return user;
+  }
+
+  @override
+  Future<User> logOut() async {
+    await localSource.clearUser();
+    return await getUser();
   }
 }

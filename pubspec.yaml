@@ -53,6 +53,7 @@ dependencies:
   flutter_hooks: ^0.21.2
   shared_preferences: ^2.0.15
   geodesy: ^0.4.0-nullsafety.0
+  jwt_decode: ^0.3.1
 
 dev_dependencies:
   flutter_test:
@@ -96,6 +97,8 @@ flutter:
     - assets/icons/AttentionTriangle.png
     - assets/icons/HighSpeed.png
     - assets/icons/ParkedVehicle.png
+    - assets/icons/NoAccess.svg
+    - assets/icons/NoAccess.png
     - .env
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

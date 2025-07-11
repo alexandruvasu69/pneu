@@ -445,7 +445,7 @@ class MapboxController implements AbstractMapController {
       1: (await rootBundle.load('assets/icons/AttentionTriangle.png'))
           .buffer
           .asUint8List(),
-      2: (await rootBundle.load('assets/icons/HighSpeed.png'))
+      6: (await rootBundle.load('assets/icons/NoAccess.png'))
           .buffer
           .asUint8List(),
       3: (await rootBundle.load('assets/icons/ParkedVehicle.png'))
@@ -462,7 +462,7 @@ class MapboxController implements AbstractMapController {
       return PointAnnotationOptions(
         geometry: Point(coordinates: e.geometry.toMapboxPosition()),
         image: imageData,
-        iconSize: 1.0,
+        iconSize: iconKey != 6 ? 1.0 : 0.3,
       );
     }).toList();
 

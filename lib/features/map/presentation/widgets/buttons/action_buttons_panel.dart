@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pneu/features/map/enums/panel_content_type.dart';
+import 'package:pneu/features/map/presentation/stores/events_store.dart';
 import 'package:pneu/features/map/presentation/stores/panel_store.dart';
 import 'package:pneu/features/map/presentation/widgets/buttons/action_buttons/general_action_button.dart';
 import 'package:pneu/features/map/presentation/widgets/buttons/action_buttons/more_button.dart';
@@ -31,6 +32,7 @@ class _ActionButtonsPanelState extends State<ActionButtonsPanel> {
   @override
   Widget build(BuildContext context) {
     final panelStore = context.watch<PanelStore>();
+    final eventsStore = context.read<EventsStore>();
 
     !panelStore.isPanelClosed ? isGeneralActionButtonActive = false : null;
 
@@ -42,9 +44,9 @@ class _ActionButtonsPanelState extends State<ActionButtonsPanel> {
                   delay: const Duration(milliseconds: 150),
                   child: MoreButton(
                     assetLocation: 'assets/icons/MoreEvents.svg',
-                    onTap: () {
+                    onTap: () async {
                       PanelStore panelStore = context.read<PanelStore>();
-
+                      await eventsStore.getPendingEvents();
                       panelStore.snapPanel(PanelContentType.events);
                     },
                     buttonWidth: 80,
@@ -66,10 +68,10 @@ class _ActionButtonsPanelState extends State<ActionButtonsPanel> {
                 DelayedAnimatedButton(
                   delay: Duration(milliseconds: 50),
                   child: SpecificActionButton(
-                    category: 2,
-                    assetLocation: 'assets/icons/Speed.svg',
-                    iconWidth: 60,
-                    iconHeight: 32,
+                    category: 6,
+                    assetLocation: 'assets/icons/NoAccess.svg',
+                    iconWidth: 48,
+                    iconHeight: 48,
                     onTap: () => handleGeneralActionButtonClick(context),
                   ),
                 ),

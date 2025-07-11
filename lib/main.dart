@@ -6,8 +6,10 @@ import 'package:pneu/features/login/data/datasources/user_supabase_data_source.d
 import 'package:pneu/features/login/data/repositories/user_repository_impl.dart';
 import 'package:pneu/features/login/domain/repositiories/user_repository.dart';
 import 'package:pneu/features/login/domain/usecases/get_user.dart';
+import 'package:pneu/features/login/domain/usecases/log_out.dart';
 import 'package:pneu/features/login/domain/usecases/login.dart';
 import 'package:pneu/features/login/domain/usecases/register.dart';
+import 'package:pneu/features/login/domain/usecases/update_user_role.dart';
 import 'package:pneu/features/login/presentation/account_screen.dart';
 import 'package:pneu/features/login/presentation/login_screen.dart';
 import 'package:pneu/features/login/presentation/notifiers/user_notifier.dart';
@@ -26,10 +28,12 @@ import 'package:pneu/features/map/domain/repositories/location_repository.dart';
 import 'package:pneu/features/map/domain/repositories/route_repository.dart';
 import 'package:pneu/features/map/domain/repositories/saved_location_repository.dart';
 import 'package:pneu/features/map/domain/usecases/add_event.dart';
+import 'package:pneu/features/map/domain/usecases/approve_event.dart';
 import 'package:pneu/features/map/domain/usecases/delete_saved_location.dart';
 import 'package:pneu/features/map/domain/usecases/get_calculated_routes.dart';
 import 'package:pneu/features/map/domain/usecases/get_events_for_bounds.dart';
 import 'package:pneu/features/map/domain/usecases/get_location.dart';
+import 'package:pneu/features/map/domain/usecases/get_pending_events.dart';
 import 'package:pneu/features/map/domain/usecases/get_saved_locations.dart';
 import 'package:pneu/features/map/domain/usecases/retrieve_location.dart';
 import 'package:pneu/features/map/domain/usecases/save_location.dart';
@@ -108,8 +112,14 @@ EventsStore initEventsStore() {
   EventsRepository eventsRepository = EventsRepositoryImpl(datasource);
   GetEventsForBounds getEventsForBounds = GetEventsForBounds(eventsRepository);
   AddEvent addEvent = AddEvent(eventsRepository);
+  GetPendingEvents getPendingEvents = GetPendingEvents(eventsRepository);
+  ApproveEvent approveEvent = ApproveEvent(eventsRepository);
   return EventsStore(
-      getEventsForBounds: getEventsForBounds, addEvent: addEvent);
+    getEventsForBounds: getEventsForBounds,
+    addEvent: addEvent,
+    getPendingEvents: getPendingEvents,
+    approveEvent: approveEvent,
+  );
 }
 
 SavedLocationsStore initSavedLocationsStore(ModalStore modalStore) {
@@ -136,12 +146,17 @@ Future<UserNotifier> initUserNotifier(
   GetUser getUser = GetUser(repository);
   Login login = Login(repository);
   Register register = Register(repository);
+  UpdateUserRole updateUserRole = UpdateUserRole(repository);
+  LogOut logOut = LogOut(repository);
 
   UserNotifier userNotifier = UserNotifier(
-      getUser: getUser,
-      login: login,
-      register: register,
-      savedLocationsStore: savedLocationsStore);
+    getUser: getUser,
+    login: login,
+    register: register,
+    updateUserRole: updateUserRole,
+    logOut: logOut,
+    savedLocationsStore: savedLocationsStore,
+  );
 
   await userNotifier.loadInitialUser();
   return userNotifier;

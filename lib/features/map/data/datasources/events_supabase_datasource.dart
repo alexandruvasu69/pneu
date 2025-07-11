@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pneu/core/result/either.dart';
 import 'package:pneu/core/result/exceptions.dart';
+import 'package:pneu/features/login/domain/entities/user.dart';
 import 'package:pneu/features/map/domain/entities/event.dart';
 import 'package:pneu/shared/models/custom_lat_lng.dart';
 
@@ -64,6 +65,64 @@ class EventsSupabaseDatasource {
           "user_id": userId,
           "p_description": description
         }),
+      );
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        return Either.right(body[0]);
+      } else {
+        return Either.left(ServerException(response.body));
+      }
+    } catch (e) {
+      return Either.left(NetworkException(
+          "Conextion error! Please check your connection to the internet!"));
+    }
+  }
+
+  Future<Either<AppException, List<dynamic>>> getPendingEvents() async {
+    final Uri url = Uri.parse(
+        '${dotenv.env['SUPABASE_URL']}/rest/v1/events?status=eq.pending');
+
+    try {
+      final http.Response response = await http.get(
+        url,
+        // ignore: always_specify_types
+        headers: {
+          'apikey': dotenv.env['SUPABASE_ANON_KEY']!,
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        return Either.right(body);
+      } else {
+        return Either.left(ServerException(response.body));
+      }
+    } catch (e) {
+      return Either.left(NetworkException(
+          "Conextion error! Please check your connection to the internet!"));
+    }
+  }
+
+  Future<Either<AppException, Map<String, dynamic>>> approveEvent(
+      Event event, User user) async {
+    print("EVENT ID: ${event.id}");
+    final Uri url = Uri.parse(
+        '${dotenv.env['SUPABASE_URL']}/rest/v1/events?id=eq.${event.id}');
+
+    try {
+      final http.Response response = await http.patch(
+        url,
+        // ignore: always_specify_types
+        headers: {
+          'apikey': dotenv.env['SUPABASE_ANON_KEY']!,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation',
+          'Authorization': 'Bearer ${user.token}'
+        },
+        // ignore: always_specify_types
+        body: jsonEncode({"status": "approved"}),
       );
 
       if (response.statusCode == 200) {

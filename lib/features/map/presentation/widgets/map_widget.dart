@@ -32,6 +32,9 @@ class _MapWidgetState extends State<MapWidget> {
 
     void handleCameraChange(
         mb.CameraChangedEventData cameraChangedEventData) async {
+      print("IS LOCKED: ${context.read<PanelStore>().isPanelLocked}");
+      print("PANEL TYPE: ${context.read<PanelStore>().panelContentType}");
+      print("IS OPENING: ${context.read<PanelStore>().isPanelOpening}");
       final zoom = cameraChangedEventData.cameraState.zoom;
       if (zoom.floor() != mapStore.zoom.floor()) {
         mapStore.drawEvents(eventsStore.shownEvents, zoom);
@@ -49,7 +52,7 @@ class _MapWidgetState extends State<MapWidget> {
       }
 
       _debounce?.cancel();
-      _debounce = Timer(const Duration(milliseconds: 50), () async {
+      _debounce = Timer(const Duration(milliseconds: 200), () async {
         final cs = cameraChangedEventData.cameraState;
 
         final co = MapCameraOptions(

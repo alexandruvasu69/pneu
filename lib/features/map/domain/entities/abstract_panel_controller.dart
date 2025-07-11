@@ -5,4 +5,5 @@ abstract class AbstractPanelController {
   Future<void> closePanel();
   double get panelPosition;
   Object getPanel();
+  get isPanelAnimating;
 }
