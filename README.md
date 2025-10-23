@@ -23,8 +23,7 @@ This app proposes a navigation experience similar to Waze, but specially adapted
 ## Technologies
 
 - **Frontend**: [Flutter](https://flutter.dev/) - cross-platform UI framework 
-- **Backend**: [Firebase](https://firebase.google.com/) - autentification, database and analytics
-- **Maps and routing**: [Google Maps API](https://cloud.google.com/maps-platform) for routing and navigation
+- **Backend**: [Supabase](https://supabase.com/) - autentification, database, analytics, API for navigation
 
 ---
 
@@ -45,22 +44,8 @@ This app proposes a navigation experience similar to Waze, but specially adapted
    git clone https://github.com/alexandruvasu69/pneu.git
    cd pneu
 
-2. **Install necessary packages**:
+2. [**Set up Flutter SDK**](https://docs.flutter.dev/get-started/quick):
+
+3. **Install necessary packages**:
    
    flutter pub get
-
-3. **Set up Google Maps API**:
-
-    - Create a project on Google Cloud Console.
-    - Enable Maps SDK for Android and Maps SDK for iOS.
-    - Get an API key and add it to the .env file (make sure to exclude this file from git):
-        
-        GOOGLE_MAPS_API_KEY=your_api_key_here
-
-4. **Set up Firebase**:
-    - Create a project on Firebase Console.
-    - Add the app for Android and iOS, download the configuration files (google-services.json for Android and GoogleService-Info.plist for iOS), and place them in the appropriate directories.
-
-5. **Run the app**:
-
-    flutter run
