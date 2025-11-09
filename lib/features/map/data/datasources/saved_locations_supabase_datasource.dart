@@ -29,7 +29,6 @@ class SavedLocationsSupabaseDatasource {
         // ignore: always_specify_types
         headers: {
           'apikey': dotenv.env['SUPABASE_ANON_KEY']!,
-          //   'Authorization': 'Bearer ${user.token}',
           'Content-Type': 'application/json',
           'Prefer': 'return=representation',
         },
@@ -62,7 +61,6 @@ class SavedLocationsSupabaseDatasource {
         // ignore: always_specify_types
         headers: {
           'apikey': dotenv.env['SUPABASE_ANON_KEY']!,
-          //   'Authorization': 'Bearer ${user.token}',
           'Content-Type': 'application/json',
         },
       );

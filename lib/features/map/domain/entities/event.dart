@@ -4,7 +4,7 @@ abstract class Event {
   Event({
     required this.id,
     required this.subtypeId,
-    required this.edgeId,
+    this.edgeId,
     this.description,
     required this.geometry,
     required this.status,
@@ -14,7 +14,7 @@ abstract class Event {
 
   final int id;
   final int subtypeId;
-  final int edgeId;
+  final int? edgeId;
   final String? description;
   final CustomLatLng geometry;
   final String status;

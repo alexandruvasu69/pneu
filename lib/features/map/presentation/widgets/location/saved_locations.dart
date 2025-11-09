@@ -19,25 +19,6 @@ class _SavedLocationsState extends State<SavedLocations> {
     return Column(
       children: [
         for (final loc in store.savedLocations) Text(loc.address1),
-        //   Positioned(
-        //     // exemplu: le punem la 10px distanţă una sub alta
-        //     top: 10.0 + locations.indexOf(loc) * 60,
-        //     left: 10,
-        //     right: 10,
-        //     child: Card(
-        //       child: ListTile(
-        //         title: Text(loc.address1),
-        //         subtitle: Text('${loc.address1}, ${loc.address2}'),
-        //         trailing: IconButton(
-        //           icon: Icon(Icons.delete),
-        //           onPressed: () {},
-        //         ),
-        //         onTap: () {
-        //           // centrare pe hartă, etc.
-        //         },
-        //       ),
-        //     ),
-        //   ),
       ],
     );
   }

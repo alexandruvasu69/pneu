@@ -31,8 +31,7 @@ class EventsStore extends m.ChangeNotifier {
 
     final freshIds = fresh.map((e) => e.id).toSet();
 
-    shownEvents.removeWhere(
-        (e) => !freshIds.contains(e.id) && adminEvents.contains(e.id));
+    shownEvents.removeWhere((e) => !freshIds.contains(e.id));
 
     for (final e in fresh) {
       if (!shownEvents.any((old) => old.id == e.id)) {

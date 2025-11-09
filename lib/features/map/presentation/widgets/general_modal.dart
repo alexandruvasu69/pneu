@@ -15,13 +15,10 @@ class GeneralModal extends StatelessWidget {
     return Positioned.fill(
       child: Stack(
         children: [
-          // 1) the modal barrier blocks hits to anything below it
           const ModalBarrier(
             dismissible: false,
-            color: Colors.transparent, // semi-transparent black
+            color: Colors.transparent,
           ),
-
-          // 2) then on top of that we center our Card
           Center(
             child: Card(
               shape: RoundedRectangleBorder(

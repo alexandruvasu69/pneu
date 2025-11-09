@@ -17,17 +17,13 @@ class RetrievedLocationModel extends Location {
     final double? lon = coords.isNotEmpty ? coords[0].toDouble() : null;
     final double? lat = coords.length > 1 ? coords[1].toDouble() : null;
 
-    // proprietăți
     final props = feature['properties'] as Map<String, dynamic>? ?? {};
 
-    // id-ul unic Mapbox
     final id = props['mapbox_id'] as String? ?? '';
 
-    // address1: de obicei numele străzii
     final address1 =
         props['address'] as String? ?? props['name'] as String? ?? '';
 
-    // address2: full address sau fallback la place_formatted
     final address2 = props['place_formatted'] as String? ??
         props['place']['name'] as String? ??
         '';

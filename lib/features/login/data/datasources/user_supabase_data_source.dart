@@ -63,4 +63,20 @@ class UserSupabaseDataSource {
 
     return jsonDecode(response.body);
   }
+
+  Future<Map<String, dynamic>> refreshToken(String refreshToken) async {
+    final Uri url = Uri.parse(
+        '${dotenv.env['SUPABASE_URL']}/auth/v1/token?grant_type=refresh_token');
+
+    http.Response response = await http.post(
+      url,
+      headers: {
+        'apikey': dotenv.env['SUPABASE_ANON_KEY']!,
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({"refresh_token": refreshToken}),
+    );
+
+    return jsonDecode(response.body);
+  }
 }

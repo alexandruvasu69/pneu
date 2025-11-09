@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pneu/features/login/presentation/notifiers/user_notifier.dart';
 import 'package:pneu/features/map/presentation/map_screen.dart';
 import 'package:pneu/shared/stores/user_store.dart';
 import 'package:provider/provider.dart';
@@ -20,7 +21,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userProv = Provider.of<UserStore>(context);
+    final userProv = Provider.of<UserNotifier>(context);
     if (userProv.isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -39,7 +40,6 @@ class _SignupScreenState extends State<SignupScreen> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    // EMAIL
                     TextFormField(
                       key: const ValueKey('signup_email'),
                       decoration: const InputDecoration(labelText: 'Email'),
@@ -55,7 +55,6 @@ class _SignupScreenState extends State<SignupScreen> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    // PAROLA
                     TextFormField(
                       key: const ValueKey('signup_password'),
                       decoration: const InputDecoration(labelText: 'Parolă'),
@@ -108,7 +107,6 @@ class _SignupScreenState extends State<SignupScreen> {
         email: _email,
         password: _password,
       );
-      // Dacă a reușit, du‐te la Home
       if (mounted) {
         Navigator.of(context).pop();
       }

@@ -37,8 +37,9 @@ class SpecificActionButton extends StatelessWidget {
         await context.read<EventsStore>().addEvent(currentPosition.latitude,
             currentPosition.longitude, category, userId, '');
 
-        onTap.call();
-      }, // TO-DO: add API request for adding events to the database,
+        print("ON TAP");
+        onTap();
+      },
       assetLocation: assetLocation,
       buttonWidth: 80,
       buttonHeight: 80,

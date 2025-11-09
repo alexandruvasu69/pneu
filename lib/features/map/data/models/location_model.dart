@@ -12,14 +12,12 @@ class LocationModel extends Location {
   factory LocationModel.fromJson(Map<String, dynamic> json) {
     final List features = json['features'] as List;
 
-    // 1) întâi cautăm un feature de tipul „address”
     Map<String, dynamic>? chosen =
         features.cast<Map<String, dynamic>>().firstWhere(
               (f) => f['properties']['feature_type'] == 'address',
               orElse: () => {},
             );
 
-    // 2) dacă nu e „address”, căutăm un „street”
     if (chosen.isEmpty) {
       chosen = features.cast<Map<String, dynamic>>().firstWhere(
             (f) => f['properties']['feature_type'] == 'street',
@@ -27,7 +25,6 @@ class LocationModel extends Location {
           );
     }
 
-    // 3) dacă nici street nu există, poți face fallback la postcode/place etc.
     if (chosen.isEmpty) {
       chosen = features.cast<Map<String, dynamic>>().firstWhere(
             (f) => f['properties']['feature_type'] == 'postcode',
@@ -42,16 +39,13 @@ class LocationModel extends Location {
     final props = chosen['properties'] as Map<String, dynamic>;
     final geom = chosen['geometry'] as Map<String, dynamic>;
 
-    // Cum extragi id-ul – vine ca string
     final id = chosen['id'] as String;
 
-    // address1 = numărul/strada dacă există
     final address1 =
         (props['context'] != null && props['context']['address'] != null)
             ? props['context']['address']['name'] as String
             : props['name'] as String;
 
-    // address2 = full_address / place_formatted
     final address2 = props['place_formatted'] as String? ?? 'unknown place';
 
     final coords = geom['coordinates'] as List;

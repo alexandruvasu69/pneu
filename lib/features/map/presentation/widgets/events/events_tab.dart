@@ -40,8 +40,13 @@ class _EventsTabState extends State<EventsTab> {
             EventCard(
               event: e,
               onTap: () async {
-                mapStore.centerMapOnCurrentLocation(e.geometry, zoom: 18);
-                eventsStore.shownEvents.add(e);
+                context.read<MapStore>().isCenteringForAdminEvent = true;
+                await mapStore.mapController?.animateCamera(e.geometry, 18);
+
+                eventsStore.shownEvents
+                  ..clear()
+                  ..add(e);
+                await mapStore.drawEvents(eventsStore.shownEvents, 18);
               },
               onApprove: () {
                 eventsStore.approveEvent(e, userStore.user!);

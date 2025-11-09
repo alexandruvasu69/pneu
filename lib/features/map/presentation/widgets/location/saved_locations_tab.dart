@@ -15,7 +15,6 @@ import 'package:provider/provider.dart';
 class SavedLocationsTab extends StatelessWidget {
   SavedLocationsTab({super.key, this.scrollController});
   ScrollController? scrollController;
-//   final ScrollController? scrollController;
 
   @override
   Widget build(BuildContext context) {
@@ -25,11 +24,9 @@ class SavedLocationsTab extends StatelessWidget {
 
     return ListView.separated(
       padding: EdgeInsets.only(
-        bottom: BarDimensions.closedPanelHeight // înălţimea footer-ului
-            +
-            MediaQuery.of(context).padding.bottom // opţional: safe-area
-            +
-            16, // puţin spaţiu extra, dacă vrei
+        bottom: BarDimensions.closedPanelHeight +
+            MediaQuery.of(context).padding.bottom +
+            16,
       ),
       controller: scrollController,
       itemCount: savedLocationsStore.savedLocations.length,

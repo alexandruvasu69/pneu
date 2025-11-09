@@ -36,7 +36,7 @@ class _MapWidgetState extends State<MapWidget> {
       print("PANEL TYPE: ${context.read<PanelStore>().panelContentType}");
       print("IS OPENING: ${context.read<PanelStore>().isPanelOpening}");
       final zoom = cameraChangedEventData.cameraState.zoom;
-      if (zoom.floor() != mapStore.zoom.floor()) {
+      if ((zoom.floor() != mapStore.zoom.floor())) {
         mapStore.drawEvents(eventsStore.shownEvents, zoom);
       }
 
@@ -53,29 +53,31 @@ class _MapWidgetState extends State<MapWidget> {
 
       _debounce?.cancel();
       _debounce = Timer(const Duration(milliseconds: 200), () async {
-        final cs = cameraChangedEventData.cameraState;
+        if (!mapStore.isCenteringForAdminEvent) {
+          final cs = cameraChangedEventData.cameraState;
 
-        final co = MapCameraOptions(
-          center: cs.center.coordinates.toCustomLatLng(), // Point
-          zoom: cs.zoom, // double
-          bearing: cs.bearing, // double
-          pitch: cs.pitch, // double
-          padding: MapEdgeInsets(
-            top: cs.padding.top,
-            left: cs.padding.left,
-            bottom: cs.padding.bottom,
-            right: cs.padding.right,
-          ), // EdgeInsets?
-        );
+          final co = MapCameraOptions(
+            center: cs.center.coordinates.toCustomLatLng(),
+            zoom: cs.zoom,
+            bearing: cs.bearing,
+            pitch: cs.pitch,
+            padding: MapEdgeInsets(
+              top: cs.padding.top,
+              left: cs.padding.left,
+              bottom: cs.padding.bottom,
+              right: cs.padding.right,
+            ),
+          );
 
-        print("ZOOM: ${cs.zoom}");
+          print("ZOOM: ${cs.zoom}");
 
-        final bounds = await mapStore.getBounds(co);
-        if (bounds.isNotEmpty) {
-          await eventsStore.getEventsForBounds(bounds[0].latitude,
-              bounds[0].longitude, bounds[1].latitude, bounds[1].longitude);
+          final bounds = await mapStore.getBounds(co);
+          if (bounds.isNotEmpty) {
+            await eventsStore.getEventsForBounds(bounds[0].latitude,
+                bounds[0].longitude, bounds[1].latitude, bounds[1].longitude);
 
-          await mapStore.drawEvents(eventsStore.shownEvents, cs.zoom);
+            await mapStore.drawEvents(eventsStore.shownEvents, cs.zoom);
+          }
         }
       });
     }
@@ -142,15 +144,8 @@ class _MapWidgetState extends State<MapWidget> {
           if (context.watch<RouteStore>().isLoading)
             Positioned.fill(
               child: AbsorbPointer(
-                // poți colore containerul semi-transparent ca feedback vizual
                 child: Container(color: Colors.transparent),
               ),
-            ),
-
-          // 4) Spinner-ul centrat
-          if (context.watch<RouteStore>().isLoading)
-            const Positioned.fill(
-              child: Center(child: CircularProgressIndicator()),
             ),
         ],
       ),

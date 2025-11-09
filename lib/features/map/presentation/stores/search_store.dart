@@ -33,11 +33,4 @@ class SearchStore extends ChangeNotifier {
 
     return location;
   }
-
-//   Future<void> addEvent(double lat, double lng, int category, String userId,
-//       String description) async {
-//     final addedEvent = await _addEvent(lat, lng, category, userId, description);
-//     shownEvents.add(addedEvent);
-//     notifyListeners();
-//   }
 }

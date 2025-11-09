@@ -32,9 +32,7 @@ class MapStore extends ChangeNotifier {
 
   AbstractMapController? mapController;
 
-//   CustomCustomLatLng? _currentPosition;
   CustomLatLng? _currentCameraPosition;
-//   CustomLatLng? get currentPosition => _currentPosition;
   CustomLatLng? get currentCameraPostion => _currentCameraPosition;
 
   List<CustomLatLng>? route;
@@ -42,18 +40,19 @@ class MapStore extends ChangeNotifier {
   bool isCentering = false;
   bool isNavigatingRoute = false;
   double _zoom = 16;
+  bool _isCenteringForAdminEvent = false;
+
+  bool get isCenteringForAdminEvent => _isCenteringForAdminEvent;
+  set isCenteringForAdminEvent(bool isCentering) {
+    _isCenteringForAdminEvent = isCentering;
+    notifyListeners();
+  }
 
   double get zoom => _zoom;
   set zoom(double zoom) {
     _zoom = zoom;
     notifyListeners();
   }
-
-//   void updateCurrentPosition(CustomLatLng currentPosition) {
-//     _currentPosition = currentPosition;
-//     print(currentPosition);
-//     notifyListeners();
-//   }
 
   void updateCurrentCameraPostition(CustomLatLng currentCameraPosition) {
     _currentCameraPosition = currentCameraPosition;
@@ -117,7 +116,6 @@ class MapStore extends ChangeNotifier {
             seg.coordinates.map((c) => CustomLatLng(c.latitude, c.longitude)))
         .toList();
     await mapController?.animateCameraToBound(coords);
-    // await mapController?.drawRoute(coords);
     _locationPopupStore.isLocationPopupActive = false;
     _panelStore.snapPanel(PanelContentType.routeDetails);
 
@@ -184,7 +182,6 @@ class MapStore extends ChangeNotifier {
   void _onPositionUpdate() async {
     final pos = _positionStore.currentPosition;
     final route = _routeStore.selectedRoute;
-    // double? bearing;
     print(
         "COORD FOR BEARING ${route?.routeSegments[_routeSequence].coordinates[route.routeSegments[_routeSequence].coordinates.length - 1]}");
     print('SEQUENCE: ${_routeSequence}');
@@ -194,10 +191,7 @@ class MapStore extends ChangeNotifier {
         pos == null ||
         route == null ||
         _positionStore.bearing == null) return;
-    // _routeSequence = _calculateSequence(pos, route, _routeSequence);
     if (isNavigatingRoute && isAutoCentering) {
-      //   await mapController!
-      //       .animateCameraAlongRoute(route, pos, _routeSequence, 18);
       await mapController!
           .animateCameraBearing(pos, _positionStore.bearing!, 18);
     }
@@ -225,7 +219,7 @@ class MapStore extends ChangeNotifier {
   }
 
   double distancePointToLine(CustomLatLng p, List<CustomLatLng> line) {
-    const double R = 6371e3; // earth radius in meters
+    const double R = 6371e3;
 
     double toRad(double deg) => deg * math.pi / 180;
     double haversineDistance(CustomLatLng a, CustomLatLng b) {
@@ -249,7 +243,6 @@ class MapStore extends ChangeNotifier {
       return (math.atan2(y, x) * 180 / math.pi + 360) % 360;
     }
 
-    // cross-track distance (signed) from p to great-circle AB
     double crossTrack(CustomLatLng p, CustomLatLng A, CustomLatLng B) {
       final ro13 = haversineDistance(A, p) / R;
       final t13 = toRad(bearing(A, p));
@@ -257,7 +250,6 @@ class MapStore extends ChangeNotifier {
       return math.asin(math.sin(ro13) * math.sin(t13 - t12)) * R;
     }
 
-    // along-track distance from A to projection of p onto AB
     double alongTrack(CustomLatLng p, CustomLatLng A, CustomLatLng B) {
       final ro13 = haversineDistance(A, p) / R;
       final xt = crossTrack(p, A, B) / R;
@@ -275,10 +267,8 @@ class MapStore extends ChangeNotifier {
 
       double d;
       if (at >= 0 && at <= segLen) {
-        // perpendicular projection falls on segment
         d = xt;
       } else {
-        // use nearest endpoint
         d = math.min(haversineDistance(p, A), haversineDistance(p, B));
       }
 

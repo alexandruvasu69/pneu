@@ -11,12 +11,11 @@ class UserStore extends ChangeNotifier {
   bool _isLoading = true;
   bool get isLoading => _isLoading;
 
-  bool _isAuthenticated = false; // dacă e logat cu cont personal
+  bool _isAuthenticated = false;
   bool get isAuthenticated => _isAuthenticated;
 
   AppUser? _currentUser;
 
-  // Gettere;
   AppUser? get currentUser => _currentUser;
 
   UserStore({required this.sharedPreferences});
@@ -42,7 +41,6 @@ class UserStore extends ChangeNotifier {
     await sharedPreferences.setString('app_user', jsonEncode(jsonString));
   }
 
-  /// Creare cont nou (Signup). Primește email + parola.
   Future<void> signUp({
     required String email,
     required String password,
@@ -51,7 +49,8 @@ class UserStore extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _currentUser = await _userService.signUp(email: email, password: password);
+      _currentUser =
+          await _userService.signUp(email: email, password: password);
 
       await _saveUserToPrefs(_currentUser!);
     } finally {
@@ -70,7 +69,8 @@ class UserStore extends ChangeNotifier {
     print("SIGNING IN...");
 
     try {
-      _currentUser = await _userService.signIn(email: email, password: password);
+      _currentUser =
+          await _userService.signIn(email: email, password: password);
 
       await _saveUserToPrefs(_currentUser!);
     } finally {

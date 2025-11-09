@@ -17,7 +17,7 @@ class EventModel extends Event {
     return EventModel(
         id: json['id'] as int,
         subtypeId: json['subtype_id'] as int,
-        edgeId: json['edge_id'] as int,
+        edgeId: json['edge_id'] as int?,
         description: json['description'] as String?,
         geometry: CustomLatLng(
             json['geom']['coordinates'][1], json['geom']['coordinates'][0]),

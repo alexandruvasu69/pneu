@@ -41,6 +41,7 @@ class EventsRepositoryImpl implements EventsRepository {
     }
 
     try {
+      print("EVENT: ${either.right}");
       final event = EventModel.fromJson(either.right);
       return Either.right(event);
     } catch (e) {

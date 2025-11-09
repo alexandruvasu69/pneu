@@ -13,7 +13,7 @@ class RouteModel extends Route {
     final segmentsJson = json['segments'] as List<dynamic>;
     final routeSegments = segmentsJson
         .map((e) => RouteSegmentModel.fromJson(e as Map<String, dynamic>))
-        .toList(); // asta e List<RouteSegmentModel>
+        .toList();
     return RouteModel(
       routeId: json['route_id'],
       start: CustomLatLng(json['start'][1], json['start'][0]),

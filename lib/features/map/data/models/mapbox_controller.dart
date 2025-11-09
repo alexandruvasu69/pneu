@@ -59,16 +59,6 @@ class MapboxController implements AbstractMapController {
     final streetLayerId = 'street-$routeId';
     final pedLayerId = 'ped-$routeId';
 
-    // if (await style.styleLayerExists(streetLayerId)) {
-    //   await style.removeStyleLayer(streetLayerId);
-    // }
-    // if (await style.styleLayerExists(pedLayerId)) {
-    //   await style.removeStyleLayer(pedLayerId);
-    // }
-    // if (await style.styleSourceExists(sourceId)) {
-    //   await style.removeStyleSource(sourceId);
-    // }
-
     final features = route.routeSegments.map((seg) {
       return {
         "type": "Feature",
@@ -78,7 +68,7 @@ class MapboxController implements AbstractMapController {
               seg.coordinates.map((c) => [c.longitude, c.latitude]).toList(),
         },
         "properties": {
-          "mode": seg.mode, // e.g. "street" or "pedestrian"
+          "mode": seg.mode,
           "highway": seg.highway,
         }
       };
@@ -212,7 +202,6 @@ class MapboxController implements AbstractMapController {
         lineOcclusionOpacity: 0,
         lineJoin: LineJoin.ROUND,
         lineElevationReference: LineElevationReference.GROUND,
-        // no dasharray → solid
       ),
     );
 
@@ -228,9 +217,9 @@ class MapboxController implements AbstractMapController {
         lineColor: 0xFF007AFF,
         lineWidth: 5.0,
         lineOpacity: 0.8,
-        lineCap: LineCap.ROUND, // capetele liniei rotunjite
+        lineCap: LineCap.ROUND,
         lineJoin: LineJoin.ROUND,
-        lineDasharray: [1.0, 2.0], // [length of dash, length of gap]
+        lineDasharray: [1.0, 2.0],
       ),
     );
   }
@@ -296,10 +285,9 @@ class MapboxController implements AbstractMapController {
       enabled: true,
       pulsingEnabled: true,
     ));
-    await _initEventAnnotations();
-
     _circleManager = await _map.annotations
         .createCircleAnnotationManager(below: 'image-layer');
+    await _initEventAnnotations();
   }
 
   Future<void> _initEventAnnotations() async {
@@ -324,7 +312,6 @@ class MapboxController implements AbstractMapController {
     final y = sin(dLon) * cos(lat2);
     final x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
     var bearing = atan2(y, x) * 180 / pi;
-    // normalizează în 0–360
     return (bearing + 360) % 360;
   }
 
@@ -424,24 +411,64 @@ class MapboxController implements AbstractMapController {
     );
   }
 
+  final Map<int, CircleAnnotation> _circleAnnotations = {};
+  final Map<int, PointAnnotation> _pointAnnotations = {};
+
   @override
   Future<void> showEventsOnMap(List<Event> events, double zoom) async {
-    await _circleManager.deleteAll();
-    await _eventAnnotationManager.deleteAll();
+    final newIds = events.map((e) => e.id).toSet();
+    final oldIds = _circleAnnotations.keys.toSet();
 
-    final circleOptions = events.map((e) {
-      return CircleAnnotationOptions(
-        geometry: Point(coordinates: e.geometry.toMapboxPosition()),
-        circleRadius: zoom > 14 ? 16.0 : 5.0,
-        circleColor: 0xFFFFFFFF,
-        circleOpacity: 0.9,
-        circleStrokeWidth: 2.0,
-        circleStrokeColor: 0xFF8A59DE,
+    for (final id in oldIds.difference(newIds)) {
+      await _circleManager.delete(_circleAnnotations[id]!);
+      await _eventAnnotationManager.delete(_pointAnnotations[id]!);
+      _circleAnnotations.remove(id);
+      _pointAnnotations.remove(id);
+    }
+
+    final newRadius = zoom > 14 ? 16.0 : 5.0;
+    final newIconSize = zoom > 14 ? 1.0 : 0.0;
+
+    for (final id in _circleAnnotations.keys) {
+      final circle = _circleAnnotations[id]!;
+      final point = _pointAnnotations[id]!;
+
+      circle.circleRadius = newRadius;
+      await _circleManager.update(circle);
+
+      point.iconSize = newIconSize;
+      await _eventAnnotationManager.update(point);
+    }
+
+    final icons = await _loadIconCache();
+
+    for (final e in events.where((e) => !oldIds.contains(e.id))) {
+      final circle = await _circleManager.create(
+        CircleAnnotationOptions(
+          geometry: Point(coordinates: e.geometry.toMapboxPosition()),
+          circleRadius: zoom > 14 ? 16.0 : 5.0,
+          circleColor: 0xFFFFFFFF,
+          circleOpacity: 0.8,
+          circleStrokeWidth: 2.0,
+          circleStrokeColor: 0xFF8A59DE,
+        ),
       );
-    }).toList();
-    await _circleManager.createMulti(circleOptions);
+      _circleAnnotations[e.id] = circle;
 
-    final Map<int, Uint8List> iconCache = {
+      final iconData = icons[e.subtypeId] ?? icons[-1]!;
+      final point = await _eventAnnotationManager.create(
+        PointAnnotationOptions(
+          geometry: Point(coordinates: e.geometry.toMapboxPosition()),
+          image: iconData,
+          iconSize: zoom > 14 ? 1 : 0,
+        ),
+      );
+      _pointAnnotations[e.id] = point;
+    }
+  }
+
+  Future<Map<int, Uint8List>> _loadIconCache() async {
+    return {
       1: (await rootBundle.load('assets/icons/AttentionTriangle.png'))
           .buffer
           .asUint8List(),
@@ -455,18 +482,6 @@ class MapboxController implements AbstractMapController {
           .buffer
           .asUint8List(),
     };
-
-    final annotations = events.map((e) {
-      final iconKey = e.subtypeId ?? -1;
-      final imageData = iconCache[iconKey] ?? iconCache['default'];
-      return PointAnnotationOptions(
-        geometry: Point(coordinates: e.geometry.toMapboxPosition()),
-        image: imageData,
-        iconSize: iconKey != 6 ? 1.0 : 0.3,
-      );
-    }).toList();
-
-    if (zoom > 14) await _eventAnnotationManager.createMulti(annotations);
   }
 
   Future<List<CircleAnnotationOptions>> createCircleOptions(

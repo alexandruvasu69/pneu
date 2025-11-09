@@ -16,7 +16,6 @@ import 'package:provider/single_child_widget.dart';
 void main() {
   testWidgets('MapScreen is displayed on app launch',
       (WidgetTester tester) async {
-    // Construiește aplicația și declanșează un cadru.
     await tester.pumpWidget(
       MultiProvider(
         providers: <SingleChildWidget>[
@@ -30,7 +29,6 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    // Verifică dacă Scaffold-ul este afișat (MapScreen folosește un Scaffold).
     expect(find.byType(Scaffold), findsWidgets);
   });
 }

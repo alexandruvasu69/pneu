@@ -57,7 +57,6 @@ class UserNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Creare cont nou (Signup). Primește email + parola.
   Future<void> signUp({
     required String email,
     required String password,

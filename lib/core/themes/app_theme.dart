@@ -20,16 +20,19 @@ class AppTheme {
         titleLarge: AppTextStyles.titleLarge,
       ),
       searchBarTheme: SearchBarThemeData(
-        backgroundColor: WidgetStatePropertyAll<Color>(AppColors.secondaryColor),
-        constraints: const BoxConstraints(maxWidth: double.infinity, maxHeight: double.infinity),
+        backgroundColor:
+            WidgetStatePropertyAll<Color>(AppColors.secondaryColor),
+        constraints: const BoxConstraints(
+            maxWidth: double.infinity, maxHeight: double.infinity),
         shape: WidgetStatePropertyAll<OutlinedBorder>(
           RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10), // Schimbă aici borderRadius
+            borderRadius: BorderRadius.circular(10),
           ),
         ),
         shadowColor: const WidgetStatePropertyAll<Color>(Colors.transparent),
         textStyle: WidgetStatePropertyAll<TextStyle>(AppTextStyles.bodyLarge),
-        padding: const WidgetStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.all(0)),
+        padding:
+            const WidgetStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.all(0)),
         hintStyle: WidgetStatePropertyAll<TextStyle>(AppTextStyles.bodyLarge),
       ));
 }

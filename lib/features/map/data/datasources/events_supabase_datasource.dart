@@ -69,6 +69,7 @@ class EventsSupabaseDatasource {
 
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
+
         return Either.right(body[0]);
       } else {
         return Either.left(ServerException(response.body));

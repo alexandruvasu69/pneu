@@ -10,6 +10,7 @@ import 'package:pneu/features/map/presentation/stores/map_store.dart';
 import 'package:pneu/features/map/presentation/stores/modal_store.dart';
 import 'package:pneu/features/map/presentation/stores/panel_store.dart';
 import 'package:pneu/features/map/presentation/stores/position_store.dart';
+import 'package:pneu/features/map/presentation/stores/route_store.dart';
 import 'package:pneu/features/map/presentation/stores/saved_locations_store.dart';
 import 'package:pneu/features/map/presentation/widgets/buttons/action_buttons_panel.dart';
 import 'package:pneu/features/map/presentation/widgets/buttons/center_button.dart';
@@ -106,20 +107,11 @@ class _MapScreenState extends State<MapScreen> {
                   _debounce?.cancel();
                   _debounce = Timer(Duration(milliseconds: 100), () async {
                     if (panelStore.position == 0) {
+                      mapStore.isCenteringForAdminEvent = false;
                       await panelStore.closePanel(onPanelClosed: true);
                     }
                   });
-
-                  //   if ((panelStore.panelContentType ==
-                  //               PanelContentType.locations ||
-                  //           panelStore.panelContentType ==
-                  //               PanelContentType.events) &&
-                  //       !panelStore.isPanelOpening) {
-                  //     await panelStore.closePanel();
-                  //     panelStore.isPanelOpening = true;
-                  //   }
                 },
-                // TO-DO: Add container for location widgets
                 panelBuilder: (sc) {
                   return Column(
                     mainAxisSize: MainAxisSize.min,
@@ -205,7 +197,11 @@ class _MapScreenState extends State<MapScreen> {
               if (context.watch<ModalStore>().isActive)
                 GeneralModal(
                     child: Text(context.read<ModalStore>().infoText!),
-                    onOkay: () => context.read<ModalStore>().closeModal())
+                    onOkay: () => context.read<ModalStore>().closeModal()),
+              if (context.watch<RouteStore>().isLoading)
+                const Positioned.fill(
+                  child: Center(child: CircularProgressIndicator()),
+                ),
             ]),
     );
   }

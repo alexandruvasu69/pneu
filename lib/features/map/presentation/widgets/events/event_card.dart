@@ -35,15 +35,6 @@ class EventCard extends StatelessWidget {
                       color: AppColors.secondaryAccent,
                     ),
                   ),
-                  //   Text(
-                  //     location?.address2 ?? 'unknown location',
-                  //     style: TextStyle(
-                  //       fontSize: 14,
-                  //       color: (isLocationSaved || isRouteDestination)
-                  //           ? AppColors.primaryColor
-                  //           : AppColors.secondaryAccent,
-                  //     ),
-                  //   ),
                 ],
               ),
             ),

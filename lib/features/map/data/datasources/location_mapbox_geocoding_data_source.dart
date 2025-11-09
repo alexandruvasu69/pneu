@@ -28,7 +28,7 @@ class LocationMapboxGeocodingDataSource {
       String location, User user, CustomLatLng position) async {
     final Uri url = Uri.parse(
       'https://api.mapbox.com/search/searchbox/v1/suggest'
-      '?q=${location}&session_token=${user.id}&proximity=${position.longitude},${position.latitude}&types=street,address'
+      '?q=${location}&session_token=${user.id}&proximity=${position.longitude},${position.latitude}&country=RO&bbox=25.90,44.30,26.30,44.60&types=street,address'
       '&access_token=${dotenv.env['MAPBOX_ACCESS_TOKEN']}',
     );
 
