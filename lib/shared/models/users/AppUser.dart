@@ -5,11 +5,9 @@ abstract class AppUser {
   AppUser({required this.id, String username = ''}) : _username = username;
 
   factory AppUser.fromJson(Map<String, dynamic> json) {
-    // Dacă există un access_token în JSON => e cont autenticat
     if (json.containsKey('access_token')) {
       return AuthUser.fromJson(json);
     }
-    // Altfel, dacă există doar id/username => e guest
     return GuestUser.fromJson(json);
   }
 

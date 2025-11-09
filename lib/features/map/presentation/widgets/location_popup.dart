@@ -1,15 +1,10 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:pneu/features/map/data/models/geocoding_response.dart';
-import 'package:pneu/features/map/presentation/stores/map_store.dart';
+import 'package:pneu/features/map/presentation/stores/location_popup_store.dart';
 import 'package:pneu/features/map/presentation/widgets/skeleton_box.dart';
 import 'package:pneu/shared/models/custom_lat_lng.dart';
 import 'package:pneu/shared/models/custom_screen_position.dart';
 import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
 
 class LocationPopup extends HookWidget {
   const LocationPopup({
@@ -28,75 +23,20 @@ class LocationPopup extends HookWidget {
     final ValueNotifier<String> address1 = useState<String>('');
     final ValueNotifier<String> address2 = useState<String>('');
 
-    final MapStore mapStore = useListenable(context.read<MapStore>());
+    final LocationPopupStore locationPopupStore =
+        useListenable(context.read<LocationPopupStore>());
 
-    final bool isActive = mapStore.isLocationPopupActive;
-    final CustomScreenPosition? screenCoord = mapStore.locationPopupScreenCoordinate;
-    final CustomLatLng? realCoord = mapStore.locationPopupRealCoordinate;
-
-    Future<void> fetchLocationForCoords() async {
-      _isLoading.value = true;
-
-      try {
-        final CustomLatLng real = context.read<MapStore>().locationPopupRealCoordinate!;
-        final double lon = real.longitude;
-        final double lat = real.latitude;
-        final Uri url = Uri.parse(
-          'https://api.mapbox.com/search/geocode/v6/reverse'
-          '?longitude=$lon&latitude=$lat'
-          '&access_token=${dotenv.env['MAPBOX_ACCESS_TOKEN']}',
-        );
-
-        final dynamic response = await http.get(url);
-        if (response.statusCode != 200) {
-          address1.value = 'Eroare rețea';
-          address2.value = '';
-          return;
-        }
-
-        final Map<String, dynamic> jsonMap = json.decode(response.body) as Map<String, dynamic>;
-        final GeocodingResponse geoResp = GeocodingResponse.fromJson(jsonMap);
-
-        if (geoResp.features.isEmpty) {
-          address1.value = 'Nicio locație găsită';
-          address2.value = '';
-          return;
-        }
-
-        final Feature feature = geoResp.features.first;
-
-        // 1) Linia principală: folosim 'name' (ex. "Strada Mexic 1")
-        address1.value = feature.name.isNotEmpty ? feature.name : feature.fullAddress;
-
-        // 2) Linie secundară: căutăm 'place' → 'region' → 'country'
-        final Map<String, Context> ctx = feature.props.context;
-        String second = '';
-        if (ctx.containsKey('place')) {
-          second = ctx['place']!.name;
-        } else if (ctx.containsKey('region')) {
-          second = ctx['region']!.name;
-        } else if (ctx.containsKey('country')) {
-          second = ctx['country']!.name;
-        } else {
-          // fallback: primul element din map (dacă există)
-          if (ctx.isNotEmpty) second = ctx.values.first.name;
-        }
-        address2.value = second;
-      } catch (e, st) {
-        // Logăm orice excepție neașteptată
-        debugPrint('fetchLocation error: $e\n$st');
-        address1.value = 'Eroare internă';
-        address2.value = '';
-      } finally {
-        _isLoading.value = false;
-      }
-    }
+    final bool isActive = locationPopupStore.isLocationPopupActive;
+    final CustomScreenPosition? screenCoord =
+        locationPopupStore.locationPopupScreenCoordinate;
+    final CustomLatLng? realCoord =
+        locationPopupStore.locationPopupRealCoordinate;
 
     useEffect(() {
-      // dacă s‑a deschis popup-ul sau coord s‑a schimbat
       if (isActive) {
-        _isLoading.value = true;
-        fetchLocationForCoords();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          context.read<LocationPopupStore>().loadLocation();
+        });
       }
 
       return null; // no cleanup
@@ -131,32 +71,65 @@ class LocationPopup extends HookWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        _isLoading.value
+                        (context
+                                    .read<LocationPopupStore>()
+                                    .isLocationPopupLoading ||
+                                context
+                                        .read<LocationPopupStore>()
+                                        .selectedLocation ==
+                                    null)
                             // Skeleton pentru linia 1
                             ? const SkeletonBox(width: 150, height: 20)
                             : Text(
-                                address1.value,
+                                context
+                                    .read<LocationPopupStore>()
+                                    .selectedLocation!
+                                    .address1,
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold),
                               ),
-                        _isLoading.value
+                        (context
+                                    .read<LocationPopupStore>()
+                                    .isLocationPopupLoading ||
+                                context
+                                        .read<LocationPopupStore>()
+                                        .selectedLocation ==
+                                    null)
                             // Skeleton pentru linia 2
                             ? const SkeletonBox(width: 100, height: 16)
                             : Text(
-                                address2.value,
-                                style: const TextStyle(fontSize: 14, color: Colors.grey),
+                                context
+                                        .read<LocationPopupStore>()
+                                        .selectedLocation!
+                                        .address2 ??
+                                    'fjjfj',
+                                style: const TextStyle(
+                                    fontSize: 14, color: Colors.grey),
                               ),
                         const SizedBox(height: 12),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: <Widget>[
-                            _isLoading.value
+                            (context
+                                        .read<LocationPopupStore>()
+                                        .isLocationPopupLoading ||
+                                    context
+                                            .read<LocationPopupStore>()
+                                            .selectedLocation ==
+                                        null)
                                 ? const SkeletonBox(width: 100, height: 25)
                                 : ElevatedButton(
                                     onPressed: onCancel,
                                     child: const Text('Cancel'),
                                   ),
-                            _isLoading.value
+                            (context
+                                        .read<LocationPopupStore>()
+                                        .isLocationPopupLoading ||
+                                    context
+                                            .read<LocationPopupStore>()
+                                            .selectedLocation ==
+                                        null)
                                 ? const SkeletonBox(width: 100, height: 25)
                                 : ElevatedButton(
                                     onPressed: onRoutes,
@@ -169,12 +142,13 @@ class LocationPopup extends HookWidget {
                   ),
                 ),
                 // Săgeata (triunghiul)
-                // Positioned(
-                //   child: CustomPaint(
-                //     size: const Size(20, 10),
-                //     painter: _TrianglePainter(color: Colors.white, elevation: 5),
-                //   ),
-                // ),
+                Positioned(
+                  child: CustomPaint(
+                    size: const Size(20, 10),
+                    painter:
+                        _TrianglePainter(color: Colors.white, elevation: 5),
+                  ),
+                ),
               ],
             ),
           ),
@@ -185,42 +159,43 @@ class LocationPopup extends HookWidget {
 }
 
 // CustomPainter care desenează un triunghi
-// class _TrianglePainter extends CustomPainter {
-//   _TrianglePainter({
-//     this.color = Colors.white,
-//     this.elevation = 4.0,
-//   });
+class _TrianglePainter extends CustomPainter {
+  _TrianglePainter({
+    this.color = Colors.white,
+    this.elevation = 4.0,
+  });
 
-//   final Color color;
-//   final double elevation; // cât de “înaltă” e umbra
+  final Color color;
+  final double elevation; // cât de “înaltă” e umbra
 
-//   @override
-//   void paint(Canvas canvas, Size size) {
-//     final Paint paint = Paint()..color = color;
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()..color = color;
 
-//     // 1. Definim forma triunghiului
-//     final Path path = Path()
-//       ..moveTo(0, 0)
-//       ..lineTo(size.width, 0)
-//       ..lineTo(size.width / 2, size.height)
-//       ..close();
+    // 1. Definim forma triunghiului
+    final Path path = Path()
+      ..moveTo(0, 0)
+      ..lineTo(size.width, 0)
+      ..lineTo(size.width / 2, size.height)
+      ..close();
 
-//     // 2. Tragem umbra
-//     //    - path: forma
-//     //    - color: culoarea umbrei
-//     //    - elevation: “înălțimea” umbrei (cu cât e mai mare, cu atât e mai difuză)
-//     //    - transparentOccluder: true ca să se comporte ca un obiect opac
-//     canvas.drawShadow(
-//       path,
-//       Colors.black.withOpacity(0.25),
-//       elevation,
-//       true,
-//     );
+    // 2. Tragem umbra
+    //    - path: forma
+    //    - color: culoarea umbrei
+    //    - elevation: “înălțimea” umbrei (cu cât e mai mare, cu atât e mai difuză)
+    //    - transparentOccluder: true ca să se comporte ca un obiect opac
+    canvas.drawShadow(
+      path,
+      Colors.black.withOpacity(0.25),
+      elevation,
+      true,
+    );
 
-//     // 3. Tragem triunghiul
-//     canvas.drawPath(path, paint);
-//   }
+    // 3. Tragem triunghiul
+    canvas.drawPath(path, paint);
+  }
 
-//   @override
-//   bool shouldRepaint(_TrianglePainter old) => old.color != color || old.elevation != elevation;
-// }
+  @override
+  bool shouldRepaint(_TrianglePainter old) =>
+      old.color != color || old.elevation != elevation;
+}

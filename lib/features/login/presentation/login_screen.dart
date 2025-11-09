@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pneu/features/login/presentation/notifiers/user_notifier.dart';
 import 'package:pneu/features/login/presentation/signup_screen.dart';
-import 'package:pneu/features/map/presentation/screens/map_screen.dart';
+import 'package:pneu/features/map/presentation/map_screen.dart';
 import 'package:pneu/shared/stores/user_store.dart';
 import 'package:provider/provider.dart';
 
@@ -24,7 +24,6 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final userProv = Provider.of<UserNotifier>(context);
 
-    // Dacă provider spune că e loading global, putem arăta un loader peste tot
     if (userProv.isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -43,7 +42,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    // EMAIL
                     TextFormField(
                       key: const ValueKey('login_email'),
                       decoration: const InputDecoration(labelText: 'Email'),
@@ -53,23 +51,22 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                       validator: (val) {
                         if (val == null || !val.contains('@')) {
-                          return 'Te rog introdu un email valid';
+                          return 'Please enter a valid email';
                         }
                         return null;
                       },
                     ),
                     const SizedBox(height: 16),
-                    // PAROLA
                     TextFormField(
                       key: const ValueKey('login_password'),
-                      decoration: const InputDecoration(labelText: 'Parolă'),
+                      decoration: const InputDecoration(labelText: 'Password'),
                       obscureText: true,
                       onSaved: (val) {
                         _password = val!.trim();
                       },
                       validator: (val) {
                         if (val == null || val.length < 6) {
-                          return 'Parola trebuie să aibă minim 6 caractere';
+                          return 'Password should have a minimum of 6 characters';
                         }
                         return null;
                       },
@@ -85,25 +82,15 @@ class _LoginScreenState extends State<LoginScreen> {
                         ? const CircularProgressIndicator()
                         : ElevatedButton(
                             onPressed: () => _submitLogin(context),
-                            child: const Text('Loghează-te'),
+                            child: const Text('Login'),
                           ),
                     const SizedBox(height: 8),
                     TextButton(
                       onPressed: () {
-                        Navigator.of(context).pushReplacementNamed(SignupScreen.routeName);
+                        Navigator.of(context)
+                            .pushReplacementNamed(SignupScreen.routeName);
                       },
-                      child: const Text('Nu ai cont? Înregistrează-te'),
-                    ),
-                    const SizedBox(height: 24),
-                    const Divider(),
-                    const SizedBox(height: 12),
-                    // Buton de Guest (opțional, dacă vrei să îi lași să meargă direct)
-                    ElevatedButton(
-                      onPressed: () {
-                        // Dacă deja există guest (provider deja a apelat RPC la pornire), îi dăm direct Home:
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text('Continuă ca Guest'),
+                      child: const Text('Don\'t have an account? Sign up'),
                     ),
                   ],
                 ),
@@ -130,7 +117,6 @@ class _LoginScreenState extends State<LoginScreen> {
         email: _email,
         password: _password,
       );
-      // Dacă a reușit, navighează la Home
       if (mounted) {
         Navigator.of(context).pop();
       }

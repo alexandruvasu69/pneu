@@ -1,11 +1,11 @@
 enum PanelContentType {
   locations(0.5, false),
-  events(0.4, true),
-  routeDetails(0.5, true),
+  events(0.4, false),
+  routeDetails(0.30, true),
   directionDetails(0.2, true);
 
-  const PanelContentType(this.snapPoint, this.isFixed);
+  const PanelContentType(this.snapPoint, this.isLocked);
 
   final double snapPoint;
-  final bool isFixed;
+  final bool isLocked;
 }

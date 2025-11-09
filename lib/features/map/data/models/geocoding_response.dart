@@ -4,7 +4,9 @@ class GeocodingResponse {
   factory GeocodingResponse.fromJson(Map<String, dynamic> json) {
     return GeocodingResponse(
       // ignore: always_specify_types
-      features: (json['features'] as List<dynamic>).map((f) => Feature.fromJson(f as Map<String, dynamic>)).toList(),
+      features: (json['features'] as List<dynamic>)
+          .map((f) => Feature.fromJson(f as Map<String, dynamic>))
+          .toList(),
     );
   }
 
@@ -21,7 +23,8 @@ class Feature {
   });
 
   factory Feature.fromJson(Map<String, dynamic> json) {
-    final Map<String, dynamic> propsJson = json['properties'] as Map<String, dynamic>? ?? <String, dynamic>{};
+    final Map<String, dynamic> propsJson =
+        json['properties'] as Map<String, dynamic>? ?? <String, dynamic>{};
     return Feature(
       id: json['id'] as String? ?? '',
       name: propsJson['name'] as String? ?? '',
@@ -32,8 +35,8 @@ class Feature {
   }
 
   final String id;
-  final String name; // maps to properties['name']
-  final String fullAddress; // properties['full_address']
+  final String name;
+  final String fullAddress;
   final Geometry geometry;
   final Properties props;
 }
@@ -44,7 +47,9 @@ class Geometry {
   factory Geometry.fromJson(Map<String, dynamic> json) => Geometry(
         type: json['type'] as String? ?? '',
         // ignore: always_specify_types
-        coordinates: (json['coordinates'] as List<dynamic>).map((c) => (c as num).toDouble()).toList(),
+        coordinates: (json['coordinates'] as List<dynamic>)
+            .map((c) => (c as num).toDouble())
+            .toList(),
       );
 
   final String type;
@@ -57,7 +62,8 @@ class Properties {
   factory Properties.fromJson(Map<String, dynamic> json) {
     final Map<String, Context> ctx = <String, Context>{};
     if (json['context'] is Map<String, dynamic>) {
-      (json['context'] as Map<String, dynamic>).forEach((String key, dynamic val) {
+      (json['context'] as Map<String, dynamic>)
+          .forEach((String key, dynamic val) {
         if (val is Map<String, dynamic>) {
           ctx[key] = Context.fromJson(val);
         }
@@ -66,13 +72,14 @@ class Properties {
     return Properties(context: ctx);
   }
 
-  final Map<String, Context> context; // mapă de sub-context
+  final Map<String, Context> context;
 }
 
 class Context {
   Context({required this.name});
 
-  factory Context.fromJson(Map<String, dynamic> json) => Context(name: json['name'] as String? ?? '');
+  factory Context.fromJson(Map<String, dynamic> json) =>
+      Context(name: json['name'] as String? ?? '');
 
   final String name;
 }

@@ -44,12 +44,16 @@ dependencies:
   supabase_flutter: ^2.8.4
   flutter_map: ^4.0.0
   latlong2: ^0.8.2
+  flutter_compass: '^0.8.1'
+
 
   mapbox_maps_flutter: ^2.0.0
   flutter_dotenv: ^5.2.1
   shimmer: ^3.0.0
   flutter_hooks: ^0.21.2
   shared_preferences: ^2.0.15
+  geodesy: ^0.4.0-nullsafety.0
+  jwt_decode: ^0.3.1
 
 dev_dependencies:
   flutter_test:
@@ -86,6 +90,15 @@ flutter:
     - assets/icons/Speed.svg
     - assets/icons/StoppedCar.svg
     - assets/icons/MoreEvents.svg
+    - assets/icons/Heart.svg
+    - assets/icons/Share.svg
+    - assets/icons/Cancel.svg
+    - assets/icons/SaveFavorite.svg
+    - assets/icons/AttentionTriangle.png
+    - assets/icons/HighSpeed.png
+    - assets/icons/ParkedVehicle.png
+    - assets/icons/NoAccess.svg
+    - assets/icons/NoAccess.png
     - .env
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

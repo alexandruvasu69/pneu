@@ -12,6 +12,7 @@ abstract class User {
 
   bool get isGuest;
   String? get token;
+  String? get refreshToken;
   String get role;
   set role(String r);
 
@@ -19,7 +20,11 @@ abstract class User {
 }
 
 class AuthUser extends User {
-  AuthUser({required super.id, required this.email, required this.accessToken, required this.refreshToken})
+  AuthUser(
+      {required super.id,
+      required this.email,
+      required this.accessToken,
+      required this.refreshToken})
       : role = 'auth';
 
   final String email;
@@ -60,5 +65,9 @@ class GuestUser extends User {
   set role(String r) {}
 
   @override
-  Map<String, dynamic> toJson() => <String, dynamic>{"id": id, "username": username};
+  Map<String, dynamic> toJson() =>
+      <String, dynamic>{"id": id, "username": username};
+
+  @override
+  String? get refreshToken => null;
 }

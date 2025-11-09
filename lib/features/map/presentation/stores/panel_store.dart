@@ -1,55 +1,63 @@
 import 'package:flutter/material.dart';
+import 'package:pneu/features/map/domain/entities/abstract_panel_controller.dart';
 import 'package:pneu/features/map/enums/panel_content_type.dart';
 
 class PanelStore extends ChangeNotifier {
-  bool _isPanelOpen = false;
-  bool _isPanelSnapped = false;
-  bool _isOpening = false;
-  bool _isClosing = false;
+  AbstractPanelController? panelController;
+  bool _isPanelLocked = false;
   double _position = 0;
-  bool _openPanel = false;
+  bool _isPanelOpening = false;
+
   PanelContentType _panelContentType = PanelContentType.locations;
 
-  bool get isPanelOpen => _isPanelOpen;
-  bool get isPanelSnapped => _isPanelSnapped;
-  bool get isOpening => _isOpening;
-  bool get isClosing => _isClosing;
   double get position => _position;
-  bool get openPanel => _openPanel;
-  PanelContentType get panelContentType => _panelContentType;
-
-  set isPanelOpen(bool value) {
-    _isPanelOpen = value;
-    notifyListeners();
-  }
-
-  set isPanelSnapped(bool value) {
-    _isPanelSnapped = value;
-    notifyListeners();
-  }
-
-  set isOpening(bool value) {
-    _isOpening = value;
-    notifyListeners();
-  }
-
-  set isClosing(bool value) {
-    _isClosing = value;
-    notifyListeners();
-  }
-
   set position(double position) {
     _position = position;
     notifyListeners();
   }
 
-  set panelContentType(PanelContentType value) {
-    _panelContentType = value;
+  bool get isPanelClosed => _position == 0;
+
+  bool get isPanelOpening => _isPanelOpening;
+  set isPanelOpening(bool isOpening) {
+    _isPanelOpening = isOpening;
     notifyListeners();
   }
 
-  set openPanel(bool value) {
-    _openPanel = value;
+  bool get isPanelLocked => _isPanelLocked;
+  PanelContentType get panelContentType => _panelContentType;
+
+  Future<void> snapPanel(
+      [PanelContentType panelContentType = PanelContentType.locations]) async {
+    print("OPEN PANEL: ${position}");
+    _panelContentType = panelContentType;
+    notifyListeners();
+    await panelController?.animatePanelToPosition(panelContentType.snapPoint);
+    _isPanelLocked = panelContentType.isLocked;
+
+    notifyListeners();
+  }
+
+  Future<void> closePanel({bool onPanelClosed = false}) async {
+    _isPanelLocked = false;
+    notifyListeners();
+
+    if (!onPanelClosed) {
+      await panelController?.closePanel();
+    }
+    _panelContentType = PanelContentType.locations;
+
+    notifyListeners();
+  }
+
+  Future<void> openPanel(
+      [PanelContentType panelContentType = PanelContentType.locations]) async {
+    await panelController?.openPanel();
+    notifyListeners();
+  }
+
+  void initController(AbstractPanelController panelController) {
+    this.panelController = panelController;
     notifyListeners();
   }
 }
