@@ -84,7 +84,7 @@ If you do not want to use a physical device, run the APK in an Android Emulator.
 4. Start the emulator
 5. Drag and drop the downloaded APK file into the emulator window
 
-### Important — Set GPS location to Bucharest 📍 
+### Important - Set GPS location to Bucharest 📍 
 
 The routing system uses your GPS location.  
 To make the demo meaningful, set the emulator location to Bucharest:
