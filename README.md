@@ -5,7 +5,7 @@
 
 ---
 
-## 🚀 Overview
+## Overview
 
 **pneu** (personal project / bachelor's thesis project) is a **real-time cycling navigation application** focused on safer & more efficient routing for cycling in Bucharest.
 
@@ -21,20 +21,20 @@ Unlike Google Maps in Bucharest, the app integrates:
 
 | Category | Feature | Status |
 |----------|---------|--------|
-| 🗺️ Map & Navigation | Mapbox integration (vector tiles, gestures, camera position syncing) | ✅ |
+| Map & Navigation | Mapbox integration (vector tiles, gestures, camera position syncing) | ✅ |
 | | Custom Mapbox styling (custom style hosted on Mapbox Studio) | ✅ |
 | | Camera animations (smooth transitions on routing / centering map) | ✅ |
 | | Tap / long-press on map to drop marker & start routing | ✅ |
 | | Live event rendering | ✅ |
-| 📍 Geolocation | Real-time GPS tracking | ✅ |
+| Geolocation | Real-time GPS tracking | ✅ |
 | | Reverse geocoding → convert coordinates to human-friendly address | ✅ |
 | | Auto-center user location toggle (lock / unlock camera) | ✅ |
-| 🚴 Routing Engine | Live route computation using **pgRouting (Dijkstra)** | ✅ |
+| Routing Engine | Live route computation using **pgRouting (Dijkstra)** | ✅ |
 | | Multiple route options (alternative routes) | ✅ |
 | | Draw route on the map (polyline layer + animation) | ✅ |
 | | Support for cycling-specific routing (towards bike lanes) | ✅ |
 | | Multi-stop routing (waypoints) | In progress |
-| 📊 Data / Backend | PostGIS spatial indexing for performance | ✅ |
+| Data / Backend | PostGIS spatial indexing for performance | ✅ |
 | | pgRouting server-side routing computation | ✅ |
 | | Filtering events based on viewport bounding box | ✅ |
 | | Crowdsource events (user can submit events regarding infrastructure/safety) | ✅ |
@@ -84,7 +84,7 @@ If you do not want to use a physical device, run the APK in an Android Emulator.
 4. Start the emulator
 5. Drag and drop the downloaded APK file into the emulator window
 
-### Important - Set GPS location to Bucharest 📍 
+### Important - Set GPS location to Bucharest
 
 The routing system uses your GPS location.  
 To make the demo meaningful, set the emulator location to Bucharest:
